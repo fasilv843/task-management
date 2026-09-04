@@ -14,23 +14,26 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { rxResource, takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 
+import {
+  CommonDateInput,
+  earliestSelectable,
+} from '../../components/common-date-input/common-date-input';
 import { CommonInput } from '../../components/common-input/common-input';
-import { InputType } from '../../components/common-input/common-input.types';
 import { CommonSelect } from '../../components/common-select/common-select';
 import { ErrorState } from '../../components/error-state/error-state';
 import { RichTextEditor } from '../../components/rich-text-editor/rich-text-editor';
 import { FocusFirstInvalidDirective } from '../../shared/directives/focus-first-invalid.directive';
 import { TaskStore } from '../../services/task-store';
-import { DateService } from '../../services/date-service';
 import { TASK_STATUS_LABELS, TaskDraft, TaskStatus } from '../../services/task.types';
-import { nonBlank } from '../../shared/form.validators';
+import { nonBlank, notInPast } from '../../shared/form.validators';
 import { TaskStatusOption } from './task-form.types';
-import { notInPast, richTextRequired } from './task-form.validators';
+import { richTextRequired } from './task-form.validators';
 
 @Component({
   selector: 'app-task-form',
   imports: [
     ReactiveFormsModule,
+    CommonDateInput,
     CommonInput,
     CommonSelect,
     ErrorState,
@@ -43,14 +46,11 @@ import { notInPast, richTextRequired } from './task-form.validators';
 })
 export class TaskForm {
   private readonly taskStore = inject(TaskStore);
-  private readonly dateService = inject(DateService);
   private readonly formBuilder = inject(FormBuilder);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
   private readonly location = inject(Location);
-
-  readonly InputType = InputType;
 
   readonly statusOptions: TaskStatusOption[] = Object.values(TaskStatus).map((value) => ({
     value,
@@ -84,9 +84,12 @@ export class TaskForm {
   readonly form = this.formBuilder.nonNullable.group({
     title: ['', [Validators.required, nonBlank, Validators.maxLength(100)]],
     description: ['', [richTextRequired]],
-    deadline: ['', [Validators.required, notInPast(this.dateService, this.originalDeadline)]],
+    deadline: ['', [Validators.required, notInPast(this.originalDeadline)]],
     status: [TaskStatus.PENDING, [Validators.required]],
   });
+
+  /** Keeps the picker's floor in step with `notInPast`, exemption included. */
+  readonly minDeadline = computed(() => earliestSelectable(this.originalDeadline()));
 
   readonly isSaving = signal(false);
 

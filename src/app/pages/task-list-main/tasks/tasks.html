@@ -21,10 +21,15 @@
   <ul class="border-b border-rule">
     @for (task of taskItems(); track task.id) {
       <li
-        class="flex gap-4 border-t border-l-4 border-rule py-5 pl-4"
+        class="group flex cursor-pointer gap-4 border-t border-l-4 border-rule py-5 pl-4 transition-colors hover:bg-black/[0.02]"
         [class.border-l-status-pending]="task.status === TaskStatus.PENDING"
         [class.border-l-status-progress]="task.status === TaskStatus.IN_PROGRESS"
         [class.border-l-status-done]="task.status === TaskStatus.COMPLETED"
+        role="link"
+        tabindex="0"
+        (click)="viewTask(task)"
+        (keydown.enter)="viewTask(task)"
+        (keydown.space)="viewTask(task); $event.preventDefault()"
       >
         <div class="min-w-0 flex-1">
           <h2 class="truncate text-[17px] font-semibold text-ink">
@@ -81,7 +86,11 @@
           </div>
         </div>
 
-        <div class="flex shrink-0 items-start gap-3 pl-2 text-sm">
+        <div
+          class="flex shrink-0 items-start gap-3 pl-2 text-sm"
+          (click)="$event.stopPropagation()"
+          (keydown)="$event.stopPropagation()"
+        >
           <app-common-button
             variant="link"
             label="View"
@@ -104,6 +113,31 @@
             (buttonClick)="deleteTask(task)"
           />
         </div>
+
+<!-- 
+        <div class="flex shrink-0 items-start gap-3 pl-2 text-sm">
+          <app-common-button
+            variant="link"
+            label="View"
+            [ariaLabel]="'View ' + task.title"
+            (buttonClick)="viewTask(task)"
+          />
+
+          <app-common-button
+            variant="link"
+            label="Edit"
+            [ariaLabel]="'Edit ' + task.title"
+            (buttonClick)="editTask(task)"
+          />
+
+          <app-common-button
+            variant="link"
+            tone="danger"
+            label="Delete"
+            [ariaLabel]="'Delete ' + task.title"
+            (buttonClick)="deleteTask(task)"
+          />
+        </div> -->
       </li>
     }
   </ul>

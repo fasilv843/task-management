@@ -1,55 +1,47 @@
-
-// TODO - use the values in the error object in validation error
-
-
 /**
- * The validation error keys the app knows how to talk about.
+ * The payloads Angular's validators put under each error key.
  *
- * Error keys are a closed set, so they are modelled as an enum rather than
- * scattered string literals. The values match the keys Angular's built-in
- * validators emit (`required`, `maxlength`, …) and the keys our own validators
- * emit (`nonBlank`, `invalidDate`, `notInPast`), which is what lets one registry
- * serve every control in the app.
+ * `ValidationErrors` is typed `{ [key: string]: any }`, and Angular publishes no
+ * type for what actually lands under `minlength` or `min`, so these mirror what
+ * the built-ins emit. They exist for one reason: to type the `error` argument of
+ * a message factory, so the wording can read `requiredLength` straight off the
+ * error instead of guarding for it at runtime. They are not domain models, and
+ * nothing outside this folder should need to name them.
  */
-export enum ValidationErrorKey {
-  REQUIRED = 'required',
-  NON_BLANK = 'nonBlank',
-  MIN_LENGTH = 'minlength',
-  MAX_LENGTH = 'maxlength',
-  MIN = 'min',
-  MAX = 'max',
-  EMAIL = 'email',
-  PATTERN = 'pattern',
-  INVALID_DATE = 'invalidDate',
-  NOT_IN_PAST = 'notInPast',
-}
 
-/**
- * Builds the message for one error.
- *
- * `error` is the value Angular put under the key (e.g. `{ requiredLength: 100,
- * actualLength: 140 }` for `maxlength`) and `label` is the field's visible
- * label, so a single message serves every field that can raise the error.
- */
-export type ValidationMessageFactory = (error: unknown, label: string) => string;
-
-/**
- * A partial override of the default messages, keyed by error key.
- *
- * A plain string is accepted wherever the wording doesn't depend on the error or
- * the label — the common case for a one-off override on a single field.
- */
-export type ValidationMessages = Readonly<Record<string, ValidationMessageFactory | string>>;
-
-/** Payload Angular attaches to a `minlength` / `maxlength` error. */
-export interface LengthValidationError {
+/** `Validators.minLength` / `Validators.maxLength`. */
+export interface LengthError {
   requiredLength: number;
   actualLength: number;
 }
 
-/** Payload Angular attaches to a `min` / `max` error. */
-export interface BoundValidationError {
-  min?: number;
-  max?: number;
+/** `Validators.min`. */
+export interface MinError {
+  min: number;
   actual: number;
 }
+
+/** `Validators.max`. */
+export interface MaxError {
+  max: number;
+  actual: number;
+}
+
+/** `Validators.pattern`. */
+export interface PatternError {
+  requiredPattern: string;
+  actualValue: string;
+}
+
+/** Our own `notInPast`; carries the earliest date the field will accept. */
+export interface NotInPastError {
+  earliest: string;
+}
+
+/**
+ * Builds the wording for one error.
+ *
+ * `error` is whatever the validator put under its key and `label` is the field's
+ * visible label, so a single message serves every field that can raise the error.
+ */
+export type ValidationMessageFactory<TError = unknown> = (error: TError, label: string) => string;

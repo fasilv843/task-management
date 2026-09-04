@@ -3,7 +3,7 @@ import { AbstractControl, ControlValueAccessor, NgControl } from '@angular/forms
 
 import { FocusableFormField } from './focusable-form-field';
 import { bindNgControl, createControlErrorState } from './form-error-state';
-import { ValidationMessages } from './validation.types';
+import { ValidationMessages } from './validation-messages';
 
 let uniqueFieldId = 0;
 

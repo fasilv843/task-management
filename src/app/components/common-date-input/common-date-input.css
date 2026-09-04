@@ -1,0 +1,45 @@
+/*
+ * Shape only. The invalid border comes from `.field--invalid` on the host, set
+ * by `InvalidFieldDirective` — see the global rule in styles.css.
+ */
+
+.common-date-input__control {
+  display: block;
+  width: 100%;
+  border: 1px solid var(--color-rule);
+  background-color: var(--color-surface);
+  padding: 0.5rem 0.75rem;
+  color: var(--color-ink);
+  transition: border-color 150ms ease;
+}
+
+.common-date-input__control:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.common-date-input__control:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* The picker button is the only affordance on the control, so it has to follow
+   the ink colour rather than the browser's default near-black. */
+.common-date-input__control::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.6;
+}
+
+.common-date-input__control::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+:host(.field--invalid) .common-date-input__control {
+  border-color: var(--color-status-overdue-ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .common-date-input__control {
+    transition: none;
+  }
+}

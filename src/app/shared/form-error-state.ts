@@ -3,8 +3,11 @@ import { AbstractControl, FormGroupDirective, NgControl } from '@angular/forms';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { merge, of, switchMap } from 'rxjs';
 
-import { VALIDATION_MESSAGES, resolveValidationMessage } from './validation-messages';
-import { ValidationMessages } from './validation.types';
+import {
+  VALIDATION_MESSAGES,
+  ValidationMessages,
+  resolveValidationMessage,
+} from './validation-messages';
 
 /** The two facts every field needs about its control: is it erroring, and what to say. */
 export interface ControlErrorState {

@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
 import { AbstractControl } from '@angular/forms';
 
 import { createControlErrorState } from '../../shared/form-error-state';
-import { ValidationMessages } from '../../shared/validation.types';
+import { ValidationMessages } from '../../shared/validation-messages';
 
 /**
  * Renders the validation message for a single reactive-forms control.

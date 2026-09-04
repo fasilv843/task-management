@@ -1,0 +1,24 @@
+<app-form-field
+  [label]="label()"
+  [labelFor]="fieldId()"
+  [labelHidden]="labelHidden()"
+  [hint]="hint()"
+  [hintId]="hintId()"
+  [errorId]="errorId()"
+  [message]="message()"
+>
+  <input
+    #control
+    type="date"
+    class="common-date-input__control font-mono"
+    [id]="fieldId()"
+    [value]="value() ?? ''"
+    [disabled]="isDisabled()"
+    [attr.min]="min()"
+    [attr.max]="max()"
+    [attr.aria-invalid]="hasError() ? 'true' : null"
+    [attr.aria-describedby]="describedBy()"
+    (input)="onInput($event)"
+    (blur)="onTouched()"
+  />
+</app-form-field>

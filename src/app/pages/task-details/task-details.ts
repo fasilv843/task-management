@@ -17,7 +17,7 @@ import { CommonButton } from '../../components/common-button/common-button';
 import { CommentThread } from '../../components/comment-thread/comment-thread';
 import { ErrorState } from '../../components/error-state/error-state';
 import { RichTextContent } from '../../components/rich-text-content/rich-text-content';
-import { DateService } from '../../services/date-service';
+import { isBeforeToday } from '../../utils/date.utils';
 import { TaskStore } from '../../services/task-store';
 import { CommentReply } from '../../services/comment.types';
 import { TASK_STATUS_LABELS, TaskStatus } from '../../services/task.types';
@@ -33,7 +33,6 @@ import { CommonBackButton } from "../../components/common-back-button/common-bac
 })
 export class TaskDetails {
   private readonly taskStore = inject(TaskStore);
-  private readonly dateService = inject(DateService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
@@ -79,7 +78,7 @@ export class TaskDetails {
       return false;
     }
 
-    return this.dateService.parseDateOnly(task.deadline) < this.dateService.startOfToday();
+    return isBeforeToday(task.deadline);
   });
 
   /** Which comment's reply box is open. Only ever one, so errors have one home. */

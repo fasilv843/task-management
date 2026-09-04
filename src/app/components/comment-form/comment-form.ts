@@ -10,9 +10,8 @@ import {
 import { FormBuilder, FormGroupDirective, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { CommonInput } from '../common-input/common-input';
-import { InputType } from '../common-input/common-input.types';
 import { FocusFirstInvalidDirective } from '../../shared/directives/focus-first-invalid.directive';
-import { ValidationErrorKey, ValidationMessages } from '../../shared/validation.types';
+import { ValidationMessages } from '../../shared/validation-messages';
 import { nonBlank } from '../../shared/form.validators';
 
 /**
@@ -54,8 +53,6 @@ export class CommentForm {
 
   readonly cancelled = output<void>();
 
-  protected readonly InputType = InputType;
-
   protected readonly form = this.formBuilder.nonNullable.group({
     text: ['', [Validators.required, nonBlank, Validators.maxLength(1000)]],
   });
@@ -66,9 +63,9 @@ export class CommentForm {
    * from the label the way the default messages do it.
    */
   protected readonly errorMessages: ValidationMessages = {
-    [ValidationErrorKey.REQUIRED]: 'Comment cannot be empty.',
-    [ValidationErrorKey.NON_BLANK]: 'Comment cannot be empty.',
-    [ValidationErrorKey.MAX_LENGTH]: 'Comment must be 1000 characters or fewer.',
+    required: 'Comment cannot be empty.',
+    nonBlank: 'Comment cannot be empty.',
+    maxlength: 'Comment must be 1000 characters or fewer.',
   };
 
   private readonly field = viewChild(CommonInput);

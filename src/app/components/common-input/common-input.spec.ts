@@ -3,7 +3,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { CommonInput } from './common-input';
-import { InputType } from './common-input.types';
 import { nonBlank } from '../../shared/form.validators';
 
 /** Hosts the field the way a real form does, inside a [formGroup]. */
@@ -21,7 +20,7 @@ import { nonBlank } from '../../shared/form.validators';
       <app-common-input
         fieldId="notes"
         label="Notes"
-        [type]="InputType.TEXTAREA"
+        type="textarea"
         formControlName="notes"
       />
       <button type="submit">Save</button>
@@ -29,8 +28,6 @@ import { nonBlank } from '../../shared/form.validators';
   `,
 })
 class HostComponent {
-  protected readonly InputType = InputType;
-
   readonly form = new FormBuilder().nonNullable.group({
     title: ['', [Validators.required, nonBlank, Validators.maxLength(5)]],
     notes: [''],
@@ -109,7 +106,7 @@ describe('CommonInput', () => {
     host.form.controls.title.markAsTouched();
     await fixture.whenStable();
 
-    expect(errorText()).toBe('Title must be 5 characters or fewer.');
+    expect(errorText()).toBe('Title must be 5 characters or fewer — 12 entered.');
   });
 
   it('clears the treatment once the field becomes valid', async () => {

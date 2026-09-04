@@ -12,7 +12,7 @@ import { FormField } from '../form-field/form-field';
 import { BaseFormControl } from '../../shared/base-form-control';
 import { FocusableFormField } from '../../shared/focusable-form-field';
 import { InvalidFieldDirective } from '../../shared/directives/invalid-field.directive';
-import { InputType } from './common-input.types';
+import { CommonInputType } from './common-input.types';
 
 /**
  * The app's text-entry field.
@@ -23,8 +23,11 @@ import { InputType } from './common-input.types';
  *
  * ```html
  * <app-common-input label="Title" formControlName="title" />
- * <app-common-input label="Deadline" [type]="InputType.DATE" formControlName="deadline" />
+ * <app-common-input label="Notes" type="textarea" formControlName="notes" />
  * ```
+ *
+ * Deadlines and other dates use `CommonDateInput`, which owns the `min`/`max`
+ * boundary as well as the markup.
  */
 @Component({
   selector: 'app-common-input',
@@ -39,23 +42,16 @@ import { InputType } from './common-input.types';
   },
 })
 export class CommonInput extends BaseFormControl<string> {
-  readonly type = input<InputType>(InputType.TEXT);
+  readonly type = input<CommonInputType>('text');
 
   readonly placeholder = input('');
 
   readonly autocomplete = input<string | null>(null);
 
-  /** Rows for `InputType.TEXTAREA`; ignored by every other type. */
+  /** Rows for the `textarea` type; ignored by every other type. */
   readonly rows = input(3);
 
-  protected readonly InputType = InputType;
-
-  protected readonly isTextarea = computed(() => this.type() === InputType.TEXTAREA);
-
-  /** Dates read as data, so they get the mono face the rest of the app uses for it. */
-  protected readonly controlClass = computed(() =>
-    this.type() === InputType.DATE ? 'common-input__control font-mono' : 'common-input__control',
-  );
+  protected readonly isTextarea = computed(() => this.type() === 'textarea');
 
   private readonly controlElement =
     viewChild<ElementRef<HTMLInputElement | HTMLTextAreaElement>>('control');

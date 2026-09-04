@@ -45,12 +45,12 @@
         placeholder="Describe the task…"
       />
 
-      <app-common-input
+      <app-common-date-input
         class="mb-8"
         fieldId="task-deadline"
         label="Deadline"
-        [type]="InputType.DATE"
         formControlName="deadline"
+        [min]="minDeadline()"
       />
 
       <app-common-select

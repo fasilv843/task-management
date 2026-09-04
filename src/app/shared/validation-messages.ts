@@ -1,55 +1,66 @@
 import { InjectionToken, Provider } from '@angular/core';
 import { ValidationErrors } from '@angular/forms';
 
+import { formatDateLabel } from '../utils/date.utils';
 import {
-  BoundValidationError,
-  LengthValidationError,
-  ValidationErrorKey,
+  LengthError,
+  MaxError,
+  MinError,
+  NotInPastError,
+  PatternError,
   ValidationMessageFactory,
-  ValidationMessages,
 } from './validation.types';
 
-function isLengthError(error: unknown): error is LengthValidationError {
-  return typeof error === 'object' && error !== null && 'requiredLength' in error;
-}
-
-function isBoundError(error: unknown): error is BoundValidationError {
-  return typeof error === 'object' && error !== null && 'actual' in error;
-}
+/**
+ * The wording every field gets unless it says otherwise, and the app's list of
+ * error keys — the two are the same thing on purpose.
+ *
+ * Keys are Angular's own error-key names (`required`, `maxlength`, …) plus the
+ * ones our validators emit, so there is no enum restating them. Each factory
+ * declares the payload its key carries, which is what lets the message quote the
+ * rule (`requiredLength`) and what the user actually did (`actualLength`) rather
+ * than repeating a number the form would have to keep in step by hand.
+ *
+ * Messages are written against the field's `label`, so one entry covers every
+ * control that can raise the error.
+ */
+export const DEFAULT_VALIDATION_MESSAGES = {
+  required: (_error: true, label: string) => `${label} is required.`,
+  nonBlank: (_error: true, label: string) => `${label} is required.`,
+  minlength: (error: LengthError, label: string) =>
+    `${label} must be at least ${error.requiredLength} characters — ${error.actualLength} entered.`,
+  maxlength: (error: LengthError, label: string) =>
+    `${label} must be ${error.requiredLength} characters or fewer — ${error.actualLength} entered.`,
+  min: (error: MinError, label: string) => `${label} must be ${error.min} or more.`,
+  max: (error: MaxError, label: string) => `${label} must be ${error.max} or less.`,
+  email: () => 'Enter a valid email address.',
+  pattern: (_error: PatternError, label: string) => `${label} is not in the expected format.`,
+  invalidDate: () => 'Enter a valid date.',
+  notInPast: (error: NotInPastError, label: string) =>
+    `${label} cannot be earlier than ${formatDateLabel(error.earliest)}.`,
+};
 
 /**
- * The wording every field gets unless it says otherwise.
+ * Every error key the app knows how to talk about.
  *
- * Messages are written against the field's `label` so one entry covers every
- * control that can raise the error — which is what stops each form from
- * re-spelling "… is required." for itself.
+ * Derived from the registry rather than declared beside it, so adding a message
+ * is the only way to add a key and the two can never drift apart.
  */
-export const DEFAULT_VALIDATION_MESSAGES: Readonly<
-  Record<ValidationErrorKey, ValidationMessageFactory>
-> = {
-  [ValidationErrorKey.REQUIRED]: (_error, label) => `${label} is required.`,
-  [ValidationErrorKey.NON_BLANK]: (_error, label) => `${label} is required.`,
-  [ValidationErrorKey.MIN_LENGTH]: (error, label) =>
-    isLengthError(error)
-      ? `${label} must be at least ${error.requiredLength} characters.`
-      : `${label} is too short.`,
-  [ValidationErrorKey.MAX_LENGTH]: (error, label) =>
-    isLengthError(error)
-      ? `${label} must be ${error.requiredLength} characters or fewer.`
-      : `${label} is too long.`,
-  [ValidationErrorKey.MIN]: (error, label) =>
-    isBoundError(error) && error.min !== undefined
-      ? `${label} must be ${error.min} or more.`
-      : `${label} is too small.`,
-  [ValidationErrorKey.MAX]: (error, label) =>
-    isBoundError(error) && error.max !== undefined
-      ? `${label} must be ${error.max} or less.`
-      : `${label} is too large.`,
-  [ValidationErrorKey.EMAIL]: () => 'Enter a valid email address.',
-  [ValidationErrorKey.PATTERN]: (_error, label) => `${label} is not in the expected format.`,
-  [ValidationErrorKey.INVALID_DATE]: () => 'Enter a valid date.',
-  [ValidationErrorKey.NOT_IN_PAST]: (_error, label) => `${label} cannot be in the past.`,
-};
+export type ValidationErrorKey = keyof typeof DEFAULT_VALIDATION_MESSAGES;
+
+/**
+ * Wording overrides, for one field or for the whole app.
+ *
+ * A plain string is accepted wherever the wording doesn't depend on the error or
+ * the label — the common case for a one-off override on a single field.
+ *
+ * Keys are checked against the registry, so a typo is a compile error. The other
+ * side of that: a new custom validator has to earn a default message here before
+ * any field can restate it, which is what keeps the registry complete.
+ */
+export type ValidationMessages = Partial<
+  Record<ValidationErrorKey, ValidationMessageFactory | string>
+>;
 
 /**
  * Which error to speak about when a control breaks several rules at once.
@@ -60,16 +71,16 @@ export const DEFAULT_VALIDATION_MESSAGES: Readonly<
  * characters or fewer." on an empty field.
  */
 export const VALIDATION_ERROR_PRIORITY: readonly ValidationErrorKey[] = [
-  ValidationErrorKey.REQUIRED,
-  ValidationErrorKey.NON_BLANK,
-  ValidationErrorKey.INVALID_DATE,
-  ValidationErrorKey.NOT_IN_PAST,
-  ValidationErrorKey.MIN_LENGTH,
-  ValidationErrorKey.MAX_LENGTH,
-  ValidationErrorKey.MIN,
-  ValidationErrorKey.MAX,
-  ValidationErrorKey.EMAIL,
-  ValidationErrorKey.PATTERN,
+  'required',
+  'nonBlank',
+  'invalidDate',
+  'notInPast',
+  'minlength',
+  'maxlength',
+  'min',
+  'max',
+  'email',
+  'pattern',
 ];
 
 /**
@@ -103,11 +114,15 @@ export function resolveValidationMessage(
     return null;
   }
 
-  const registry: ValidationMessages = Object.assign(
-    {},
-    DEFAULT_VALIDATION_MESSAGES,
-    ...overrides.filter((override): override is ValidationMessages => override !== undefined),
-  ) as ValidationMessages;
+  // `never` for the payload is what lets factories with different, specific error
+  // types (`LengthError`, `MinError`, …) sit in one lookup: a parameter is
+  // checked contravariantly, and every type accepts `never`.
+  const registry: Record<string, ValidationMessageFactory<never> | string | undefined> =
+    Object.assign(
+      {},
+      DEFAULT_VALIDATION_MESSAGES,
+      ...overrides.filter((override): override is ValidationMessages => override !== undefined),
+    );
 
   const activeKeys = Object.keys(errors);
   const prioritised = VALIDATION_ERROR_PRIORITY.filter((key) => activeKeys.includes(key));
@@ -122,7 +137,14 @@ export function resolveValidationMessage(
       continue;
     }
 
-    return typeof entry === 'function' ? entry(errors[key], label) : entry;
+    if (typeof entry !== 'function') {
+      return entry;
+    }
+
+    // The one cast in the chain, and the honest place for it: Angular types every
+    // error payload as `any`, so this is where an untyped value meets a factory
+    // that has declared what it expects.
+    return (entry as ValidationMessageFactory<unknown>)(errors[key], label);
   }
 
   return null;

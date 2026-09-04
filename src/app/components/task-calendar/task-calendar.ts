@@ -1,9 +1,9 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import { FullCalendarModule } from '@fullcalendar/angular';
 import { CalendarOptions, EventClickArg, EventInput, EventMountArg } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 
-import { DateService } from '../../services/date-service';
+import { parseDateOnly } from '../../utils/date.utils';
 import { TASK_STATUS_LABELS, Task } from '../../services/task.types';
 import { TASK_STATUS_EVENT_COLORS, TaskEventProps } from './task-calendar.types';
 
@@ -31,8 +31,6 @@ import { TASK_STATUS_EVENT_COLORS, TaskEventProps } from './task-calendar.types'
   template: '<full-calendar [options]="calendarOptions()" />',
 })
 export class TaskCalendar {
-  private readonly dateService = inject(DateService);
-
   readonly tasks = input.required<readonly Task[]>();
 
   /** Emits the id of the task whose event was activated. */
@@ -97,7 +95,7 @@ export class TaskCalendar {
   private describeEvent(arg: EventMountArg): void {
     const { status } = arg.event.extendedProps as TaskEventProps;
     const deadline = arg.event.startStr;
-    const dueLabel = this.dateLabelFormat.format(this.dateService.parseDateOnly(deadline));
+    const dueLabel = this.dateLabelFormat.format(parseDateOnly(deadline));
 
     arg.el.setAttribute(
       'aria-label',

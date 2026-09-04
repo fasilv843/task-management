@@ -6,7 +6,6 @@ import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/route
 import { of } from 'rxjs';
 
 import { TaskForm } from './task-form';
-import { TaskFormMode } from './task-form.types';
 import { TaskRow, TaskStatus } from '../../services/task.types';
 
 const existingTask: TaskRow = {
@@ -62,7 +61,7 @@ describe('TaskForm', () => {
       const fixture = await setUp({});
       const component = fixture.componentInstance;
 
-      expect(component.mode()).toBe(TaskFormMode.CREATE);
+      expect(component.mode()).toBe('create');
       expect(component.form.getRawValue()).toEqual({
         title: '',
         description: '',
@@ -110,7 +109,9 @@ describe('TaskForm', () => {
       component.form.controls.deadline.markAsTouched();
       await fixture.whenStable();
 
-      expect(errorTextFor(fixture, 'task-deadline-error')).toBe('Deadline cannot be in the past.');
+      expect(errorTextFor(fixture, 'task-deadline-error')).toMatch(
+        /^Deadline cannot be earlier than .+\.$/,
+      );
     });
 
     it('treats an empty rich text value as missing', async () => {
@@ -131,7 +132,7 @@ describe('TaskForm', () => {
       const fixture = await setUp({ id: '1' });
       const component = fixture.componentInstance;
 
-      expect(component.mode()).toBe(TaskFormMode.UPDATE);
+      expect(component.mode()).toBe('update');
 
       TestBed.inject(HttpTestingController)
         .expectOne('assets/tasks.json')

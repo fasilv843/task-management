@@ -8,7 +8,7 @@ import { CommonTab } from '../../../components/common-tab/common-tab';
 import { ErrorState } from '../../../components/error-state/error-state';
 import { RichTextContent } from '../../../components/rich-text-content/rich-text-content';
 import { TaskStore } from '../../../services/task-store';
-import { DateService } from '../../../services/date-service';
+import { isBeforeToday } from '../../../utils/date.utils';
 import { TASK_STATUS_LABELS, Task, TaskListItem, TaskStatus } from '../../../services/task.types';
 import { TASK_VIEW_TABS } from '../../../shared/task-view-tabs';
 
@@ -21,7 +21,6 @@ import { TASK_VIEW_TABS } from '../../../shared/task-view-tabs';
 })
 export class Tasks {
   private readonly taskStore = inject(TaskStore);
-  private readonly dateService = inject(DateService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -35,13 +34,10 @@ export class Tasks {
 
   readonly taskItems = computed<TaskListItem[]>(() => {
     const tasks = this.tasksResource.value() ?? [];
-    const today = this.dateService.startOfToday();
 
     return tasks.map((task) => ({
       ...task,
-      isOverdue:
-        task.status !== TaskStatus.COMPLETED &&
-        this.dateService.parseDateOnly(task.deadline) < today,
+      isOverdue: task.status !== TaskStatus.COMPLETED && isBeforeToday(task.deadline),
     }));
   });
 

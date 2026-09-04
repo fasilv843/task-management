@@ -1,7 +1,7 @@
 import { Injectable, inject, signal, untracked } from '@angular/core';
 import { Observable, map, of, switchMap, tap } from 'rxjs';
 
-import { DateService } from './date-service';
+import { nowIso } from '../utils/date.utils';
 import { TaskRepo } from './task-repo';
 import { CommentDraft, TaskComment } from './comment.types';
 import { Task, TaskDraft, TaskQueryOptions, TaskWithComments } from './task.types';
@@ -26,7 +26,6 @@ import { Task, TaskDraft, TaskQueryOptions, TaskWithComments } from './task.type
 })
 export class TaskStore {
   private readonly repo = inject(TaskRepo);
-  private readonly dateService = inject(DateService);
 
   private readonly tasks = signal<Task[] | null>(null);
 
@@ -138,7 +137,7 @@ export class TaskStore {
         const created: TaskComment = {
           ...draft,
           id: crypto.randomUUID(),
-          createdAt: this.dateService.nowIso(),
+          createdAt: nowIso(),
         };
 
         this.comments.set([...comments, created]);
