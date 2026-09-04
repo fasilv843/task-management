@@ -14,19 +14,29 @@ import { map } from 'rxjs';
 
 import { CommentForm } from '../../components/comment-form/comment-form';
 import { CommonButton } from '../../components/common-button/common-button';
+import { CommonStatus } from '../../components/common-status/common-status';
 import { CommentThread } from '../../components/comment-thread/comment-thread';
 import { ErrorState } from '../../components/error-state/error-state';
 import { RichTextContent } from '../../components/rich-text-content/rich-text-content';
 import { isBeforeToday } from '../../utils/date.utils';
 import { TaskStore } from '../../services/task-store';
 import { CommentReply } from '../../services/comment.types';
-import { TASK_STATUS_LABELS, TaskStatus } from '../../services/task.types';
+import { TASK_STATUS_LABELS, TASK_STATUS_TONES, TaskStatus } from '../../services/task.types';
 import { buildCommentTree } from './comment-tree.utils';
 import { CommonBackButton } from "../../components/common-back-button/common-back-button";
 
 @Component({
   selector: 'app-task-details',
-  imports: [DatePipe, CommonButton, ErrorState, RichTextContent, CommentForm, CommentThread, CommonBackButton],
+  imports: [
+    DatePipe,
+    CommonButton,
+    CommonStatus,
+    ErrorState,
+    RichTextContent,
+    CommentForm,
+    CommentThread,
+    CommonBackButton,
+  ],
   templateUrl: './task-details.html',
   styleUrl: './task-details.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -39,6 +49,7 @@ export class TaskDetails {
 
   readonly TaskStatus = TaskStatus;
   readonly statusLabels = TASK_STATUS_LABELS;
+  readonly statusTones = TASK_STATUS_TONES;
 
   private readonly routeId = toSignal(this.route.paramMap.pipe(map((params) => params.get('id'))), {
     initialValue: null,

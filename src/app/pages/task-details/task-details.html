@@ -30,20 +30,11 @@
       <dl class="mt-6 flex flex-wrap gap-8" aria-label="Task summary">
         <div>
           <dt class="text-xs text-ink-soft">Status</dt>
-          <dd
-            class="mt-0.5 inline-flex items-center gap-1.5 font-mono text-sm font-medium"
-            [class.text-warning-ink]="task.status === TaskStatus.PENDING"
-            [class.text-info-ink]="task.status === TaskStatus.IN_PROGRESS"
-            [class.text-success-ink]="task.status === TaskStatus.COMPLETED"
-          >
-            <span
-              class="h-1.5 w-1.5 rounded-full"
-              [class.bg-warning]="task.status === TaskStatus.PENDING"
-              [class.bg-info]="task.status === TaskStatus.IN_PROGRESS"
-              [class.bg-success]="task.status === TaskStatus.COMPLETED"
-              aria-hidden="true"
-            ></span>
-            {{ statusLabels[task.status] }}
+          <dd class="mt-0.5">
+            <app-common-status
+              [tone]="statusTones[task.status]"
+              [label]="statusLabels[task.status]"
+            />
           </dd>
         </div>
 

@@ -1,0 +1,45 @@
+@reference '../../../styles.css';
+
+/* Every status chip in the app is one of these. The tone is selected in
+   common-status.ts by joining `status` with `status--<tone>`; nothing here is
+   meant to be overridden per page. */
+
+.status {
+  @apply inline-flex items-center gap-1.5 font-mono text-xs font-medium;
+}
+
+.status__dot {
+  @apply h-1.5 w-1.5 shrink-0 rounded-full;
+}
+
+.status--warning {
+  @apply text-warning-ink;
+}
+
+.status--warning .status__dot {
+  @apply bg-warning;
+}
+
+.status--info {
+  @apply text-info-ink;
+}
+
+.status--info .status__dot {
+  @apply bg-info;
+}
+
+.status--success {
+  @apply text-success-ink;
+}
+
+.status--success .status__dot {
+  @apply bg-success;
+}
+
+.status--danger {
+  @apply text-danger-ink;
+}
+
+.status--danger .status__dot {
+  @apply bg-danger;
+}

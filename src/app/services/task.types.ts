@@ -1,3 +1,4 @@
+import { StatusTone } from '../components/common-status/common-status.types';
 import { TaskComment } from './comment.types';
 
 export enum TaskStatus {
@@ -10,6 +11,13 @@ export const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
   [TaskStatus.PENDING]: 'Pending',
   [TaskStatus.IN_PROGRESS]: 'In progress',
   [TaskStatus.COMPLETED]: 'Completed',
+};
+
+/** Which `app-common-status` tone renders each task status. */
+export const TASK_STATUS_TONES: Record<TaskStatus, StatusTone> = {
+  [TaskStatus.PENDING]: StatusTone.Warning,
+  [TaskStatus.IN_PROGRESS]: StatusTone.Info,
+  [TaskStatus.COMPLETED]: StatusTone.Success,
 };
 
 export interface Task {

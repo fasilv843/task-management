@@ -4,17 +4,24 @@ import { Router } from '@angular/router';
 import { rxResource, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { CommonButton } from '../../../components/common-button/common-button';
+import { CommonStatus } from '../../../components/common-status/common-status';
 import { CommonTab } from '../../../components/common-tab/common-tab';
 import { ErrorState } from '../../../components/error-state/error-state';
 import { RichTextContent } from '../../../components/rich-text-content/rich-text-content';
 import { TaskStore } from '../../../services/task-store';
 import { isBeforeToday } from '../../../utils/date.utils';
-import { TASK_STATUS_LABELS, Task, TaskListItem, TaskStatus } from '../../../services/task.types';
+import {
+  TASK_STATUS_LABELS,
+  TASK_STATUS_TONES,
+  Task,
+  TaskListItem,
+  TaskStatus,
+} from '../../../services/task.types';
 import { TASK_VIEW_TABS } from '../../../shared/task-view-tabs';
 
 @Component({
   selector: 'app-tasks',
-  imports: [DatePipe, CommonButton, ErrorState, RichTextContent],
+  imports: [DatePipe, CommonButton, CommonStatus, ErrorState, RichTextContent],
   templateUrl: './tasks.html',
   styleUrl: './tasks.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -26,6 +33,7 @@ export class Tasks {
 
   readonly TaskStatus = TaskStatus;
   readonly statusLabels = TASK_STATUS_LABELS;
+  readonly statusTones = TASK_STATUS_TONES;
   readonly viewTabs = TASK_VIEW_TABS;
 
   readonly tasksResource = rxResource({
