@@ -1,4 +1,6 @@
+// TODO - InputType does not need to be an enum
 /**
+ * @deprecated Use string directly
  * What `CommonInput` renders.
  *
  * Every member except `TEXTAREA` is passed straight through as the native

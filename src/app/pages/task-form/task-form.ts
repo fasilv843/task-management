@@ -112,11 +112,11 @@ export class TaskForm {
   );
 
   readonly pageTitle = computed(() =>
-    this.mode() === TaskFormMode.CREATE ? 'New task' : 'Edit task',
+    this.mode() === TaskFormMode.CREATE ? 'Create Task' : 'Update Task',
   );
 
   readonly submitLabel = computed(() =>
-    this.mode() === TaskFormMode.CREATE ? 'Create task' : 'Save changes',
+    this.mode() === TaskFormMode.CREATE ? 'Create' : 'Update',
   );
 
   constructor() {
