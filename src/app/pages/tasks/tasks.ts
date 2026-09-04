@@ -1,17 +1,20 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { rxResource, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { CommonButton } from '../../components/common-button/common-button';
+import { ErrorState } from '../../components/error-state/error-state';
 import { RichTextContent } from '../../components/rich-text-content/rich-text-content';
+import { TaskViewSwitcher } from '../../components/task-view-switcher/task-view-switcher';
+import { TaskView } from '../../components/task-view-switcher/task-view-switcher.types';
 import { TaskStore } from '../../services/task-store';
 import { DateService } from '../../services/date-service';
 import { TASK_STATUS_LABELS, Task, TaskListItem, TaskStatus } from '../../services/task.types';
 
 @Component({
   selector: 'app-tasks',
-  imports: [DatePipe, CommonButton, RichTextContent],
+  imports: [DatePipe, CommonButton, ErrorState, RichTextContent, TaskViewSwitcher],
   templateUrl: './tasks.html',
   styleUrl: './tasks.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -20,10 +23,10 @@ export class Tasks {
   private readonly taskStore = inject(TaskStore);
   private readonly dateService = inject(DateService);
   private readonly router = inject(Router);
-  private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly TaskStatus = TaskStatus;
+  readonly TaskView = TaskView;
   readonly statusLabels = TASK_STATUS_LABELS;
 
   readonly tasksResource = rxResource({
@@ -50,16 +53,18 @@ export class Tasks {
 
   readonly overdueCount = computed(() => this.taskItems().filter((task) => task.isOverdue).length);
 
+  // Absolute paths, not relative: this page lives at /tasks/list, so a relative
+  // 'create' would resolve to /tasks/list/create.
   addTask(): void {
-    this.router.navigate(['create'], { relativeTo: this.route });
+    this.router.navigate(['/tasks', 'create']);
   }
 
   viewTask(task: Task): void {
-    this.router.navigate([task.id], { relativeTo: this.route });
+    this.router.navigate(['/tasks', task.id]);
   }
 
   editTask(task: Task): void {
-    this.router.navigate(['update', task.id], { relativeTo: this.route });
+    this.router.navigate(['/tasks', 'update', task.id]);
   }
 
   deleteTask(task: Task): void {

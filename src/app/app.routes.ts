@@ -1,11 +1,19 @@
 import { Routes } from '@angular/router';
 
 export const routes: Routes = [
+    { path: 'tasks', pathMatch: 'full', redirectTo: 'tasks/list' },
+    // 'list', 'calendar', 'create' and 'update' must all stay above 'tasks/:id',
+    // otherwise they match the details route.
     {
-        path: 'tasks',
+        path: 'tasks/list',
         loadComponent: () => import('./pages/tasks/tasks').then((m) => m.Tasks),
     },
-    // Must stay above 'tasks/:id', otherwise 'create' matches the details route.
+    {
+        // Lazy on purpose: FullCalendar is heavy and belongs in this route's own chunk.
+        path: 'tasks/calendar',
+        loadComponent: () =>
+            import('./pages/tasks-calendar/tasks-calendar').then((m) => m.TasksCalendar),
+    },
     {
         path: 'tasks/create',
         loadComponent: () => import('./pages/task-form/task-form').then((m) => m.TaskForm),

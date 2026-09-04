@@ -1,0 +1,27 @@
+@reference '../../../styles.css';
+
+/* FullCalendar renders outside Angular's style encapsulation, so it cannot be
+   styled with ordinary component selectors. Custom properties *do* inherit into
+   it, and FullCalendar exposes its whole surface through --fc-* variables, so
+   fitting it to the paper/ink palette is a matter of redeclaring them here.
+   (The one rule that needs a real selector — the focus ring on an event — lives
+   in src/styles.css alongside .field--invalid, for the same reason.) */
+:host {
+  --fc-page-bg-color: var(--color-surface);
+  --fc-border-color: var(--color-rule);
+  --fc-neutral-bg-color: var(--color-paper);
+  --fc-neutral-text-color: var(--color-ink-soft);
+  --fc-today-bg-color: var(--color-status-progress-bg);
+
+  --fc-button-bg-color: transparent;
+  --fc-button-border-color: var(--color-ink);
+  --fc-button-text-color: var(--color-ink);
+  --fc-button-hover-bg-color: var(--color-ink);
+  --fc-button-hover-border-color: var(--color-ink);
+  --fc-button-active-bg-color: var(--color-ink);
+  --fc-button-active-border-color: var(--color-ink);
+
+  --fc-small-font-size: 0.8125rem;
+
+  @apply font-sans text-ink;
+}

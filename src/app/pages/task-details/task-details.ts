@@ -15,6 +15,7 @@ import { map } from 'rxjs';
 import { CommentForm } from '../../components/comment-form/comment-form';
 import { CommonButton } from '../../components/common-button/common-button';
 import { CommentThread } from '../../components/comment-thread/comment-thread';
+import { ErrorState } from '../../components/error-state/error-state';
 import { RichTextContent } from '../../components/rich-text-content/rich-text-content';
 import { DateService } from '../../services/date-service';
 import { TaskStore } from '../../services/task-store';
@@ -24,7 +25,7 @@ import { buildCommentTree } from './comment-tree.utils';
 
 @Component({
   selector: 'app-task-details',
-  imports: [DatePipe, CommonButton, RichTextContent, CommentForm, CommentThread],
+  imports: [DatePipe, CommonButton, ErrorState, RichTextContent, CommentForm, CommentThread],
   templateUrl: './task-details.html',
   styleUrl: './task-details.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

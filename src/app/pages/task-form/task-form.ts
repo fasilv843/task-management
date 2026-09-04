@@ -17,6 +17,7 @@ import { map } from 'rxjs';
 import { CommonInput } from '../../components/common-input/common-input';
 import { InputType } from '../../components/common-input/common-input.types';
 import { CommonSelect } from '../../components/common-select/common-select';
+import { ErrorState } from '../../components/error-state/error-state';
 import { RichTextEditor } from '../../components/rich-text-editor/rich-text-editor';
 import { FocusFirstInvalidDirective } from '../../shared/directives/focus-first-invalid.directive';
 import { TaskStore } from '../../services/task-store';
@@ -32,6 +33,7 @@ import { notInPast, richTextRequired } from './task-form.validators';
     ReactiveFormsModule,
     CommonInput,
     CommonSelect,
+    ErrorState,
     RichTextEditor,
     FocusFirstInvalidDirective,
   ],

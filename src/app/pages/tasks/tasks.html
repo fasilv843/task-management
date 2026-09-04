@@ -3,7 +3,10 @@
     <div class="flex flex-wrap items-center justify-between gap-4">
       <h1 class="text-[28px] font-semibold leading-tight text-ink">Tasks</h1>
 
-      <app-common-button class="shrink-0" label="New task" (buttonClick)="addTask()" />
+      <div class="flex flex-wrap items-center gap-4">
+        <app-task-view-switcher [active]="TaskView.LIST" />
+        <app-common-button class="shrink-0" label="New task" (buttonClick)="addTask()" />
+      </div>
     </div>
 
     <dl class="mt-6 flex flex-wrap gap-8" aria-label="Task summary">
@@ -44,19 +47,7 @@
       }
     </ul>
   } @else if (tasksResource.error()) {
-    <div
-      class="border border-status-overdue-ink bg-status-overdue-bg px-6 py-8 text-center"
-      role="alert"
-    >
-      <p class="font-medium text-ink">Couldn't load your tasks.</p>
-      <p class="mt-1 text-sm text-ink-soft">Check your connection and try again.</p>
-      <app-common-button
-        class="mt-4"
-        variant="outline"
-        label="Retry"
-        (buttonClick)="tasksResource.reload()"
-      />
-    </div>
+    <app-error-state message="Couldn't load your tasks." (retry)="tasksResource.reload()" />
   } @else if (taskItems().length) {
     <ul class="border-b border-rule">
       @for (task of taskItems(); track task.id) {
