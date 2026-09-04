@@ -18,6 +18,7 @@ import {
   CommonDateInput,
   earliestSelectable,
 } from '../../components/common-date-input/common-date-input';
+import { CommonBackButton } from '../../components/common-back-button/common-back-button';
 import { CommonInput } from '../../components/common-input/common-input';
 import { CommonSelect } from '../../components/common-select/common-select';
 import { ErrorState } from '../../components/error-state/error-state';
@@ -33,6 +34,7 @@ import { richTextRequired } from './task-form.validators';
   selector: 'app-task-form',
   imports: [
     ReactiveFormsModule,
+    CommonBackButton,
     CommonDateInput,
     CommonInput,
     CommonSelect,
