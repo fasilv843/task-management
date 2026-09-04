@@ -1,0 +1,3 @@
+/* Styling is handled entirely via Tailwind utility classes in common-button.ts.
+   Add overrides here only if a case truly can't be expressed with the
+   variant/tone/size inputs. */

@@ -1,0 +1,12 @@
+<button
+  [type]="type()"
+  [disabled]="disabled()"
+  [attr.aria-label]="ariaLabel() ?? null"
+  [class]="classes"
+  (click)="onClick($event)"
+>
+  <ng-content select="[icon]" />
+  @if (label()) {
+    <span>{{ label() }}</span>
+  }
+</button>
