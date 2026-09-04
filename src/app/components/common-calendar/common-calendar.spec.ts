@@ -1,9 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 
-import { TaskCalendar } from './task-calendar';
-import { TASK_STATUS_EVENT_COLORS } from './task-calendar.types';
-import { Task, TaskStatus } from '../../services/task.types';
+import { CommonCalendar } from './common-calendar';
+import { CalendarEvent } from './common-calendar.types';
 
 /**
  * The calendar opens on the current month, so the fixtures have to fall inside
@@ -16,23 +15,26 @@ function dayOfThisMonth(day: number): string {
   return `${now.getFullYear()}-${month}-${String(day).padStart(2, '0')}`;
 }
 
-const IN_PROGRESS_DEADLINE = dayOfThisMonth(12);
-const COMPLETED_DEADLINE = dayOfThisMonth(20);
+const LOGIN_DATE = dayOfThisMonth(12);
+const RELEASE_DATE = dayOfThisMonth(20);
 
-const TASKS: Task[] = [
+const LOGIN_COLORS = { background: '#dfe6ec', border: '#28425a', text: '#1d3348' };
+
+const EVENTS: CalendarEvent[] = [
   {
     id: '1',
     title: 'Design the login flow',
-    description: '<p>…</p>',
-    deadline: IN_PROGRESS_DEADLINE,
-    status: TaskStatus.IN_PROGRESS,
+    date: LOGIN_DATE,
+    url: '/tasks/1',
+    colors: LOGIN_COLORS,
+    ariaLabel: 'Design the login flow, In progress, due later this month',
   },
   {
     id: '2',
     title: 'Write release notes',
-    description: '<p>…</p>',
-    deadline: COMPLETED_DEADLINE,
-    status: TaskStatus.COMPLETED,
+    date: RELEASE_DATE,
+    url: '/tasks/2',
+    colors: { background: '#dcece3', border: '#3c7a5c', text: '#2f6b4c' },
   },
 ];
 
@@ -40,20 +42,20 @@ const TASKS: Task[] = [
  * FullCalendar builds its own DOM, so these specs assert against what it
  * actually rendered rather than against the options object — that is the only
  * way to catch the two things that would silently break the feature: events
- * losing their href (which makes the calendar keyboard-unreachable) and a
- * deadline landing on the wrong day.
+ * losing their href (which makes the calendar keyboard-unreachable) and a date
+ * landing on the wrong day.
  */
-describe('TaskCalendar', () => {
-  let fixture: ComponentFixture<TaskCalendar>;
+describe('CommonCalendar', () => {
+  let fixture: ComponentFixture<CommonCalendar>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TaskCalendar],
+      imports: [CommonCalendar],
       providers: [provideZonelessChangeDetection()],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(TaskCalendar);
-    fixture.componentRef.setInput('tasks', TASKS);
+    fixture = TestBed.createComponent(CommonCalendar);
+    fixture.componentRef.setInput('events', EVENTS);
     await fixture.whenStable();
   });
 
@@ -72,33 +74,48 @@ describe('TaskCalendar', () => {
     expect(fixture.nativeElement.querySelector('.fc-dayGridMonth-view')).toBeTruthy();
   });
 
-  it('places each task on its deadline', () => {
+  it('places each event on its date', () => {
     const day = eventFor('Design the login flow').closest('.fc-daygrid-day');
 
-    expect(day?.getAttribute('data-date')).toBe(IN_PROGRESS_DEADLINE);
+    expect(day?.getAttribute('data-date')).toBe(LOGIN_DATE);
   });
 
-  it('links each event to the task details page', () => {
+  it('links each event to the url it was given', () => {
     expect(eventFor('Write release notes').getAttribute('href')).toBe('/tasks/2');
   });
 
-  it('colours events by status', () => {
-    const { background } = TASK_STATUS_EVENT_COLORS[TaskStatus.IN_PROGRESS];
-
+  it('applies the colours it was given', () => {
     // The DOM reports the colour back as rgb().
-    expect(eventFor('Design the login flow').style.backgroundColor).toBe(toRgb(background));
+    expect(eventFor('Design the login flow').style.backgroundColor).toBe(
+      toRgb(LOGIN_COLORS.background),
+    );
   });
 
-  it('names each event with its status and due date', () => {
-    const label = eventFor('Design the login flow').getAttribute('aria-label');
-
-    expect(label).toContain('Design the login flow');
-    expect(label).toContain('In progress');
+  it('names an event with the label it was given', () => {
+    expect(eventFor('Design the login flow').getAttribute('aria-label')).toBe(EVENTS[0].ariaLabel);
   });
 
-  it('emits the task id instead of following the link', async () => {
+  it('falls back to the title and date when no label is given', () => {
+    const label = eventFor('Write release notes').getAttribute('aria-label');
+
+    expect(label).toContain('Write release notes');
+    expect(label).toContain('20');
+  });
+
+  it('renders an event that carries nothing but a title and a date', async () => {
+    fixture.componentRef.setInput('events', [
+      { id: '3', title: 'Bare event', date: LOGIN_DATE } satisfies CalendarEvent,
+    ]);
+    await fixture.whenStable();
+
+    const bare = fixture.nativeElement.querySelector('.fc-event') as HTMLElement;
+
+    expect(bare.getAttribute('aria-label')).toContain('Bare event');
+  });
+
+  it('emits the event id instead of following the link', async () => {
     const selected: string[] = [];
-    fixture.componentInstance.taskSelect.subscribe((id) => selected.push(id));
+    fixture.componentInstance.eventSelect.subscribe((id) => selected.push(id));
 
     const click = new MouseEvent('click', { bubbles: true, cancelable: true });
     eventFor('Write release notes').dispatchEvent(click);
@@ -108,8 +125,8 @@ describe('TaskCalendar', () => {
     expect(click.defaultPrevented).toBe(true);
   });
 
-  it('re-renders when the tasks change', async () => {
-    fixture.componentRef.setInput('tasks', [TASKS[0]]);
+  it('re-renders when the events change', async () => {
+    fixture.componentRef.setInput('events', [EVENTS[0]]);
     await fixture.whenStable();
 
     expect(events()).toHaveLength(1);

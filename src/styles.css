@@ -71,10 +71,10 @@ body {
  * Focus ring for calendar events.
  *
  * Global for the same reason as the rule above: FullCalendar builds its own DOM
- * inside <app-task-calendar>, and those elements never carry the component's
+ * inside <app-common-calendar>, and those elements never carry the component's
  * encapsulation attribute, so a component-scoped selector would not reach them.
  * Everything else about the calendar's appearance is set through inherited
- * --fc-* custom properties in task-calendar.css.
+ * --fc-* custom properties in common-calendar.css.
  */
 .fc .fc-event:focus-visible {
   outline: 2px solid var(--color-accent);

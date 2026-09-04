@@ -27,8 +27,8 @@
     (retry)="tasksResource.reload()"
   />
 } @else {
-  <app-task-calendar
-    [tasks]="tasksResource.value() ?? []"
-    (taskSelect)="openTask($event)"
+  <app-common-calendar
+    [events]="calendarEvents()"
+    (eventSelect)="openTask($event)"
   />
 }
