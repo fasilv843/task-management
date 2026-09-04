@@ -2,14 +2,14 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { rxResource } from '@angular/core/rxjs-interop';
 
-import { CommonButton } from '../../components/common-button/common-button';
-import { CommonTab } from '../../components/common-tab/common-tab';
-import { ErrorState } from '../../components/error-state/error-state';
-import { TaskCalendar } from '../../components/task-calendar/task-calendar';
-import { TaskStore } from '../../services/task-store';
-import { TASK_STATUS_LABELS, TaskStatus } from '../../services/task.types';
-import { TASK_STATUS_EVENT_COLORS } from '../../components/task-calendar/task-calendar.types';
-import { TASK_VIEW_TABS } from '../../shared/task-view-tabs';
+import { CommonButton } from '../../../components/common-button/common-button';
+import { CommonTab } from '../../../components/common-tab/common-tab';
+import { ErrorState } from '../../../components/error-state/error-state';
+import { TaskCalendar } from '../../../components/task-calendar/task-calendar';
+import { TaskStore } from '../../../services/task-store';
+import { TASK_STATUS_LABELS, TaskStatus } from '../../../services/task.types';
+import { TASK_STATUS_EVENT_COLORS } from '../../../components/task-calendar/task-calendar.types';
+import { TASK_VIEW_TABS } from '../../../shared/task-view-tabs';
 
 /**
  * The calendar half of the task browser — same data as the list page, placed by
@@ -18,7 +18,7 @@ import { TASK_VIEW_TABS } from '../../shared/task-view-tabs';
  */
 @Component({
   selector: 'app-tasks-calendar',
-  imports: [CommonButton, CommonTab, ErrorState, TaskCalendar],
+  imports: [ErrorState, TaskCalendar],
   templateUrl: './tasks-calendar.html',
   styleUrl: './tasks-calendar.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

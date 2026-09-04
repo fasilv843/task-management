@@ -14,12 +14,12 @@ export const routes: Routes = [
       {
         path: 'list',
         loadComponent: () =>
-          import('./pages/tasks/tasks').then((m) => m.Tasks),
+          import('./pages/task-list-main/tasks/tasks').then((m) => m.Tasks),
       },
       {
         path: 'calendar',
         loadComponent: () =>
-          import('./pages/tasks-calendar/tasks-calendar')
+          import('./pages/task-list-main/tasks-calendar/tasks-calendar')
             .then((m) => m.TasksCalendar),
       },
     ],

@@ -3,14 +3,14 @@ import { DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { rxResource, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-import { CommonButton } from '../../components/common-button/common-button';
-import { CommonTab } from '../../components/common-tab/common-tab';
-import { ErrorState } from '../../components/error-state/error-state';
-import { RichTextContent } from '../../components/rich-text-content/rich-text-content';
-import { TaskStore } from '../../services/task-store';
-import { DateService } from '../../services/date-service';
-import { TASK_STATUS_LABELS, Task, TaskListItem, TaskStatus } from '../../services/task.types';
-import { TASK_VIEW_TABS } from '../../shared/task-view-tabs';
+import { CommonButton } from '../../../components/common-button/common-button';
+import { CommonTab } from '../../../components/common-tab/common-tab';
+import { ErrorState } from '../../../components/error-state/error-state';
+import { RichTextContent } from '../../../components/rich-text-content/rich-text-content';
+import { TaskStore } from '../../../services/task-store';
+import { DateService } from '../../../services/date-service';
+import { TASK_STATUS_LABELS, Task, TaskListItem, TaskStatus } from '../../../services/task.types';
+import { TASK_VIEW_TABS } from '../../../shared/task-view-tabs';
 
 @Component({
   selector: 'app-tasks',
