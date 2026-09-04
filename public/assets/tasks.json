@@ -4,41 +4,41 @@
     "title": "Design authentication flow",
     "description": "<p>Design the login and registration flow for the application.</p><ul><li>Define user flow</li><li>Prepare validation rules</li><li>Document authentication states</li></ul>",
     "deadline": "2026-09-08",
-    "status": "Completed"
+    "status": "COMPLETED"
   },
   {
     "id": 2,
     "title": "Implement task list",
     "description": "<p>Build the task list page with support for viewing, adding, editing, and deleting tasks.</p>",
     "deadline": "2026-09-10",
-    "status": "In Progress"
+    "status": "IN_PROGRESS"
   },
   {
     "id": 3,
     "title": "Create task form",
     "description": "<p>Create a reusable reactive form for creating and editing tasks.</p><ul><li>Title</li><li>Description</li><li>Deadline</li><li>Status</li></ul>",
     "deadline": "2026-09-12",
-    "status": "Pending"
+    "status": "PENDING"
   },
   {
     "id": 4,
     "title": "Add task details page",
     "description": "<p>Implement the task details page and display the complete information for the selected task.</p>",
     "deadline": "2026-09-14",
-    "status": "Pending"
+    "status": "PENDING"
   },
   {
     "id": 5,
     "title": "Implement comments",
     "description": "<p>Add comments and unlimited nested replies to each task using a recursive comment component.</p>",
     "deadline": "2026-09-16",
-    "status": "Pending"
+    "status": "PENDING"
   },
   {
     "id": 6,
     "title": "Integrate calendar view",
     "description": "<p>Display tasks on a calendar according to their deadlines and navigate to task details when an event is selected.</p>",
-    "deadline": "2026-09-20",
-    "status": "Pending"
+    "deadline": "2026-08-20",
+    "status": "PENDING"
   }
 ]

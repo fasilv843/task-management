@@ -1,3 +1,38 @@
 /* You can add global styles to this file, and also import other style files */
 
 @import 'tailwindcss';
+
+@theme {
+  --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
+
+  --color-paper: #f5f6f2;
+  --color-surface: #ffffff;
+  --color-ink: #1c201d;
+  --color-ink-soft: #5b6560;
+  --color-rule: #d8dad3;
+  --color-accent: #28425a;
+  --color-accent-ink: #1d3348;
+
+  --color-status-pending: #a8752a;
+  --color-status-pending-ink: #8a5a1e;
+  --color-status-pending-bg: #f3e6d2;
+
+  --color-status-progress: #28425a;
+  --color-status-progress-ink: #1d3348;
+  --color-status-progress-bg: #dfe6ec;
+
+  --color-status-done: #3c7a5c;
+  --color-status-done-ink: #2f6b4c;
+  --color-status-done-bg: #dcece3;
+
+  --color-status-overdue: #a63b2e;
+  --color-status-overdue-ink: #9a3226;
+  --color-status-overdue-bg: #f3ddd9;
+}
+
+body {
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}

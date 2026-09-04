@@ -1,0 +1,27 @@
+.task-description-preview :where(p, ul, ol) {
+  margin: 0;
+}
+
+.task-description-preview :where(ul, ol) {
+  padding-left: 1.1em;
+}
+
+.task-skeleton {
+  animation: task-skeleton-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes task-skeleton-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .task-skeleton {
+    animation: none;
+  }
+}
