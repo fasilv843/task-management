@@ -1,13 +1,6 @@
 <div class="mx-auto max-w-3xl px-6 py-10">
   <header class="mb-8 border-b border-rule pb-6">
     <h1 class="text-[28px] font-semibold leading-tight text-ink">{{ pageTitle() }}</h1>
-    <!-- <p class="mt-1 text-sm text-ink-soft">
-      @if (mode() === TaskFormMode.CREATE) {
-        Add a new task to your list.
-      } @else {
-        Update the details of this task.
-      }
-    </p> -->
   </header>
 
   @if (isLoadingTask()) {

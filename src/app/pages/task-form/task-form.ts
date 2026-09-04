@@ -24,7 +24,7 @@ import { TaskStore } from '../../services/task-store';
 import { DateService } from '../../services/date-service';
 import { TASK_STATUS_LABELS, TaskDraft, TaskStatus } from '../../services/task.types';
 import { nonBlank } from '../../shared/form.validators';
-import { TaskFormMode, TaskStatusOption } from './task-form.types';
+import { TaskStatusOption } from './task-form.types';
 import { notInPast, richTextRequired } from './task-form.validators';
 
 @Component({
@@ -50,7 +50,6 @@ export class TaskForm {
   private readonly destroyRef = inject(DestroyRef);
   private readonly location = inject(Location);
 
-  readonly TaskFormMode = TaskFormMode;
   readonly InputType = InputType;
 
   readonly statusOptions: TaskStatusOption[] = Object.values(TaskStatus).map((value) => ({
@@ -64,10 +63,10 @@ export class TaskForm {
 
   /** `tasks/create` has no `:id`; `tasks/update/:id` does. That is the whole mode switch. */
   readonly mode = computed(() =>
-    this.routeId() === null ? TaskFormMode.CREATE : TaskFormMode.UPDATE,
+    this.routeId() === null ? 'create' : 'update',
   );
 
-  readonly isUpdateMode = computed(() => this.mode() === TaskFormMode.UPDATE);
+  readonly isUpdateMode = computed(() => this.mode() === 'update');
 
   readonly taskId = computed(() => this.routeId());
 
@@ -112,11 +111,11 @@ export class TaskForm {
   );
 
   readonly pageTitle = computed(() =>
-    this.mode() === TaskFormMode.CREATE ? 'Create Task' : 'Update Task',
+    this.mode() === 'create' ? 'Create Task' : 'Update Task',
   );
 
   readonly submitLabel = computed(() =>
-    this.mode() === TaskFormMode.CREATE ? 'Create' : 'Update',
+    this.mode() === 'create' ? 'Create' : 'Update',
   );
 
   constructor() {
