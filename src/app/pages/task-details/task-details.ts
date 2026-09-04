@@ -22,10 +22,11 @@ import { TaskStore } from '../../services/task-store';
 import { CommentReply } from '../../services/comment.types';
 import { TASK_STATUS_LABELS, TaskStatus } from '../../services/task.types';
 import { buildCommentTree } from './comment-tree.utils';
+import { CommonBackButton } from "../../components/common-back-button/common-back-button";
 
 @Component({
   selector: 'app-task-details',
-  imports: [DatePipe, CommonButton, ErrorState, RichTextContent, CommentForm, CommentThread],
+  imports: [DatePipe, CommonButton, ErrorState, RichTextContent, CommentForm, CommentThread, CommonBackButton],
   templateUrl: './task-details.html',
   styleUrl: './task-details.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
