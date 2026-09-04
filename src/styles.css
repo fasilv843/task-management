@@ -14,21 +14,40 @@
   --color-accent: #28425a;
   --color-accent-ink: #1d3348;
 
-  --color-status-pending: #a8752a;
-  --color-status-pending-ink: #8a5a1e;
-  --color-status-pending-bg: #f3e6d2;
+  /*
+   * Intent-based state palette, shared by every surface that needs to signal
+   * something: error banners, destructive buttons, invalid fields, warnings,
+   * informational tints, and the task status chips. Each family is a solid
+   * base (fills, left borders), an -ink shade (text and borders on light
+   * backgrounds), and a -bg tint (panel backgrounds).
+   *
+   * Hues are saturated on purpose so each state reads as itself at a glance.
+   * The -ink shades are the ones carrying meaning, so they are held dark
+   * enough to clear WCAG AA 4.5:1 in all three places they appear: as text on
+   * --color-paper/--color-surface, as text on their own -bg tint, and (for
+   * danger) as a fill with a --color-paper label on top. Keep that check in
+   * mind before brightening an -ink value.
+   *
+   * The base shades are lighter than 3:1 in places, which is deliberate: they
+   * are only ever decorative — the aria-hidden status dot and the 4px card
+   * left border — always paired with a visible -ink label that carries the
+   * same meaning. Do not start using a base shade as a lone indicator.
+   */
+  --color-danger: #e5484d;
+  --color-danger-ink: #c02a30;
+  --color-danger-bg: #ffe8e7;
 
-  --color-status-progress: #28425a;
-  --color-status-progress-ink: #1d3348;
-  --color-status-progress-bg: #dfe6ec;
+  --color-warning: #e39c17;
+  --color-warning-ink: #96600a;
+  --color-warning-bg: #fdf0d5;
 
-  --color-status-done: #3c7a5c;
-  --color-status-done-ink: #2f6b4c;
-  --color-status-done-bg: #dcece3;
+  --color-info: #3b82f6;
+  --color-info-ink: #1d5fc4;
+  --color-info-bg: #e3edfe;
 
-  --color-status-overdue: #a63b2e;
-  --color-status-overdue-ink: #9a3226;
-  --color-status-overdue-bg: #f3ddd9;
+  --color-success: #2fa068;
+  --color-success-ink: #137a4e;
+  --color-success-bg: #e0f5e9;
 }
 
 body {
@@ -45,7 +64,7 @@ body {
  * their host element is a wrapper rather than the control itself.
  */
 .field--invalid {
-  border-color: var(--color-status-overdue-ink);
+  border-color: var(--color-danger-ink);
 }
 
 /*

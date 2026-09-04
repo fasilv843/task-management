@@ -82,5 +82,5 @@ quill-editor {
 
 :host(.field--invalid) ::ng-deep .ql-toolbar.ql-snow,
 :host(.field--invalid) ::ng-deep .ql-container.ql-snow {
-  border-color: var(--color-status-overdue-ink);
+  border-color: var(--color-danger-ink);
 }

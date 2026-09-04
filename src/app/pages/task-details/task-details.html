@@ -32,15 +32,15 @@
           <dt class="text-xs text-ink-soft">Status</dt>
           <dd
             class="mt-0.5 inline-flex items-center gap-1.5 font-mono text-sm font-medium"
-            [class.text-status-pending-ink]="task.status === TaskStatus.PENDING"
-            [class.text-status-progress-ink]="task.status === TaskStatus.IN_PROGRESS"
-            [class.text-status-done-ink]="task.status === TaskStatus.COMPLETED"
+            [class.text-warning-ink]="task.status === TaskStatus.PENDING"
+            [class.text-info-ink]="task.status === TaskStatus.IN_PROGRESS"
+            [class.text-success-ink]="task.status === TaskStatus.COMPLETED"
           >
             <span
               class="h-1.5 w-1.5 rounded-full"
-              [class.bg-status-pending]="task.status === TaskStatus.PENDING"
-              [class.bg-status-progress]="task.status === TaskStatus.IN_PROGRESS"
-              [class.bg-status-done]="task.status === TaskStatus.COMPLETED"
+              [class.bg-warning]="task.status === TaskStatus.PENDING"
+              [class.bg-info]="task.status === TaskStatus.IN_PROGRESS"
+              [class.bg-success]="task.status === TaskStatus.COMPLETED"
               aria-hidden="true"
             ></span>
             {{ statusLabels[task.status] }}
@@ -52,7 +52,7 @@
           <dd class="mt-0.5 font-mono text-sm font-medium text-ink">
             {{ task.deadline | date: 'MMM d, y' }}
             @if (isOverdue()) {
-              <span class="text-status-overdue-ink">· Overdue</span>
+              <span class="text-danger-ink">· Overdue</span>
             }
           </dd>
         </div>
@@ -66,7 +66,7 @@
 
     @if (deleteError()) {
       <div
-        class="mb-6 border border-status-overdue-ink bg-status-overdue-bg px-4 py-3 text-sm text-ink"
+        class="mb-6 border border-danger-ink bg-danger-bg px-4 py-3 text-sm text-ink"
         role="alert"
       >
         {{ deleteError() }}

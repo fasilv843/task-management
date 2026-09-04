@@ -1,5 +1,5 @@
 /* Points at the project stylesheet, not bare 'tailwindcss', so `@apply` can
-   resolve the @theme tokens declared there (accent, ink, rule, status-*).
+   resolve the @theme tokens declared there (accent, ink, rule, danger-*).
    It emits no CSS of its own. */
 @reference '../../../styles.css';
 
@@ -28,8 +28,8 @@
 }
 
 .btn--filled.btn--danger {
-  @apply border-status-overdue-ink bg-status-overdue-ink text-paper hover:bg-paper
-    hover:text-status-overdue-ink;
+  @apply border-danger-ink bg-danger-ink text-paper hover:bg-paper
+    hover:text-danger-ink;
 }
 
 .btn--outline {
@@ -37,7 +37,7 @@
 }
 
 .btn--outline.btn--danger {
-  @apply border-status-overdue-ink text-status-overdue-ink hover:bg-status-overdue-ink
+  @apply border-danger-ink text-danger-ink hover:bg-danger-ink
     hover:text-paper;
 }
 
@@ -52,5 +52,5 @@
 }
 
 .btn--link.btn--danger {
-  @apply text-status-overdue-ink;
+  @apply text-danger-ink;
 }

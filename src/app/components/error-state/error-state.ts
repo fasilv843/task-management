@@ -22,7 +22,7 @@ import { CommonButton } from '../common-button/common-button';
   host: { class: 'block' },
   template: `
     <div
-      class="border border-status-overdue-ink bg-status-overdue-bg px-6 py-8 text-center"
+      class="border border-danger-ink bg-danger-bg px-6 py-8 text-center"
       role="alert"
     >
       <p class="font-medium text-ink">{{ message() }}</p>

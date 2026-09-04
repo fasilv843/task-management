@@ -22,9 +22,9 @@
     @for (task of taskItems(); track task.id) {
       <li
         class="group flex cursor-pointer gap-4 border-t border-l-4 border-rule py-5 pl-4 transition-colors hover:bg-black/[0.02]"
-        [class.border-l-status-pending]="task.status === TaskStatus.PENDING"
-        [class.border-l-status-progress]="task.status === TaskStatus.IN_PROGRESS"
-        [class.border-l-status-done]="task.status === TaskStatus.COMPLETED"
+        [class.border-l-warning]="task.status === TaskStatus.PENDING"
+        [class.border-l-info]="task.status === TaskStatus.IN_PROGRESS"
+        [class.border-l-success]="task.status === TaskStatus.COMPLETED"
         role="link"
         tabindex="0"
         (click)="viewTask(task)"
@@ -47,25 +47,25 @@
           >
             <span
               class="inline-flex items-center gap-1.5"
-              [class.text-status-pending-ink]="
+              [class.text-warning-ink]="
                 task.status === TaskStatus.PENDING
               "
-              [class.text-status-progress-ink]="
+              [class.text-info-ink]="
                 task.status === TaskStatus.IN_PROGRESS
               "
-              [class.text-status-done-ink]="
+              [class.text-success-ink]="
                 task.status === TaskStatus.COMPLETED
               "
             >
               <span
                 class="h-1.5 w-1.5 rounded-full"
-                [class.bg-status-pending]="
+                [class.bg-warning]="
                   task.status === TaskStatus.PENDING
                 "
-                [class.bg-status-progress]="
+                [class.bg-info]="
                   task.status === TaskStatus.IN_PROGRESS
                 "
-                [class.bg-status-done]="
+                [class.bg-success]="
                   task.status === TaskStatus.COMPLETED
                 "
                 aria-hidden="true"
@@ -79,7 +79,7 @@
             </span>
 
             @if (task.isOverdue) {
-              <span class="text-status-overdue-ink">
+              <span class="text-danger-ink">
                 Overdue
               </span>
             }

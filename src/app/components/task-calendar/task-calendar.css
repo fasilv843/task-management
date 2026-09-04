@@ -11,7 +11,7 @@
   --fc-border-color: var(--color-rule);
   --fc-neutral-bg-color: var(--color-paper);
   --fc-neutral-text-color: var(--color-ink-soft);
-  --fc-today-bg-color: var(--color-status-progress-bg);
+  --fc-today-bg-color: var(--color-info-bg);
 
   --fc-button-bg-color: transparent;
   --fc-button-border-color: var(--color-ink);

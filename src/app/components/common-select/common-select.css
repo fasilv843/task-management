@@ -24,7 +24,7 @@
 }
 
 :host(.field--invalid) .common-select__control {
-  border-color: var(--color-status-overdue-ink);
+  border-color: var(--color-danger-ink);
 }
 
 @media (prefers-reduced-motion: reduce) {
