@@ -80,3 +80,27 @@ body {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
 }
+
+/*
+ * Generic pulsing placeholder for content that is still loading, used across
+ * any page that renders loading-state placeholder blocks.
+ */
+.skeleton-loader {
+  animation: skeleton-loader-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes skeleton-loader-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-loader {
+    animation: none;
+  }
+}

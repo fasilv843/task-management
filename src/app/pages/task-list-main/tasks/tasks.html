@@ -2,12 +2,12 @@
   <ul aria-label="Loading tasks" aria-busy="true">
     @for (row of [1, 2, 3]; track row) {
       <li class="flex gap-4 border-b border-rule py-5">
-        <div class="task-skeleton h-10 w-10 shrink-0 bg-rule"></div>
+        <div class="skeleton-loader h-10 w-10 shrink-0 bg-rule"></div>
 
         <div class="flex-1 space-y-2.5">
-          <div class="task-skeleton h-4 w-2/5 bg-rule"></div>
-          <div class="task-skeleton h-3 w-4/5 bg-rule"></div>
-          <div class="task-skeleton h-3 w-1/4 bg-rule"></div>
+          <div class="skeleton-loader h-4 w-2/5 bg-rule"></div>
+          <div class="skeleton-loader h-3 w-4/5 bg-rule"></div>
+          <div class="skeleton-loader h-3 w-1/4 bg-rule"></div>
         </div>
       </li>
     }

@@ -114,12 +114,12 @@
     </section>
   } @else if (isLoading()) {
     <div aria-busy="true" aria-label="Loading task">
-      <div class="task-skeleton h-4 w-28 bg-rule"></div>
-      <div class="task-skeleton mt-5 h-8 w-3/5 bg-rule"></div>
-      <div class="task-skeleton mt-5 h-4 w-2/5 bg-rule"></div>
-      <div class="task-skeleton mt-8 h-28 w-full bg-rule"></div>
-      <div class="task-skeleton mt-8 h-4 w-32 bg-rule"></div>
-      <div class="task-skeleton mt-3 h-20 w-full bg-rule"></div>
+      <div class="skeleton-loader h-4 w-28 bg-rule"></div>
+      <div class="skeleton-loader mt-5 h-8 w-3/5 bg-rule"></div>
+      <div class="skeleton-loader mt-5 h-4 w-2/5 bg-rule"></div>
+      <div class="skeleton-loader mt-8 h-28 w-full bg-rule"></div>
+      <div class="skeleton-loader mt-8 h-4 w-32 bg-rule"></div>
+      <div class="skeleton-loader mt-3 h-20 w-full bg-rule"></div>
     </div>
   } @else if (loadError()) {
     <app-error-state message="Couldn't load this task." (retry)="taskResource.reload()" />

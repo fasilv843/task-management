@@ -18,8 +18,8 @@
 
 @if (tasksResource.isLoading()) {
   <div aria-label="Loading calendar" aria-busy="true">
-    <div class="task-skeleton h-9 w-full bg-rule"></div>
-    <div class="task-skeleton mt-3 h-[30rem] w-full bg-rule"></div>
+    <div class="skeleton-loader h-9 w-full bg-rule"></div>
+    <div class="skeleton-loader mt-3 h-[30rem] w-full bg-rule"></div>
   </div>
 } @else if (tasksResource.error()) {
   <app-error-state
