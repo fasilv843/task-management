@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { CommonTab } from '../../components/common-tab/common-tab';
 import { CommonButton } from '../../components/common-button/common-button';
@@ -12,6 +12,7 @@ import { CommonButton } from '../../components/common-button/common-button';
   ],
   templateUrl: './task-list-main.html',
   styleUrl: './task-list-main.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TaskListMain {
   private readonly router = inject(Router);
