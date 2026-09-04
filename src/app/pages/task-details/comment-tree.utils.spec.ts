@@ -7,7 +7,13 @@ function comment(
   createdAt: string,
   text = `Comment ${id}`,
 ): TaskComment {
-  return { id, taskId: 1, parentCommentId, text, createdAt };
+  return {
+    id: String(id),
+    taskId: '1',
+    parentCommentId: parentCommentId === null ? null : String(parentCommentId),
+    text,
+    createdAt,
+  };
 }
 
 describe('buildCommentTree', () => {
@@ -21,7 +27,7 @@ describe('buildCommentTree', () => {
       comment(2, null, '2026-01-01T10:00:00.000Z'),
     ]);
 
-    expect(tree.map((node) => node.id)).toEqual([1, 2]);
+    expect(tree.map((node) => node.id)).toEqual(['1', '2']);
     expect(tree.every((node) => node.replies.length === 0)).toBe(true);
   });
 
@@ -37,14 +43,14 @@ describe('buildCommentTree', () => {
     expect(tree.length).toBe(1);
 
     const depths: number[] = [];
-    const ids: number[] = [];
+    const ids: string[] = [];
 
     for (let node = tree[0]; node !== undefined; node = node.replies[0]) {
       ids.push(node.id);
       depths.push(node.depth);
     }
 
-    expect(ids).toEqual([1, 2, 3, 4, 5]);
+    expect(ids).toEqual(['1', '2', '3', '4', '5']);
     expect(depths).toEqual([0, 1, 2, 3, 4]);
   });
 
@@ -54,8 +60,8 @@ describe('buildCommentTree', () => {
       comment(1, null, '2026-01-01T09:00:00.000Z'),
     ]);
 
-    expect(tree.map((node) => node.id)).toEqual([1]);
-    expect(tree[0].replies.map((node) => node.id)).toEqual([2]);
+    expect(tree.map((node) => node.id)).toEqual(['1']);
+    expect(tree[0].replies.map((node) => node.id)).toEqual(['2']);
     expect(tree[0].replies[0].depth).toBe(1);
   });
 
@@ -65,7 +71,7 @@ describe('buildCommentTree', () => {
       comment(2, 99, '2026-01-01T10:00:00.000Z'),
     ]);
 
-    expect(tree.map((node) => node.id)).toEqual([1, 2]);
+    expect(tree.map((node) => node.id)).toEqual(['1', '2']);
     expect(tree[1].depth).toBe(0);
   });
 
@@ -77,8 +83,8 @@ describe('buildCommentTree', () => {
       comment(2, 1, '2026-01-01T10:00:00.000Z'),
     ]);
 
-    expect(tree.map((node) => node.id)).toEqual([4, 1]);
-    expect(tree[1].replies.map((node) => node.id)).toEqual([2, 3]);
+    expect(tree.map((node) => node.id)).toEqual(['4', '1']);
+    expect(tree[1].replies.map((node) => node.id)).toEqual(['2', '3']);
   });
 
   it('does not mutate the comments it was given', () => {

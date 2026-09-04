@@ -4,7 +4,12 @@
       <h1 class="text-[28px] font-semibold leading-tight text-ink">Tasks</h1>
 
       <div class="flex flex-wrap items-center gap-4">
-        <app-task-view-switcher [active]="TaskView.CALENDAR" />
+        <app-common-tab
+          [tabs]="viewTabs"
+          active="calendar"
+          ariaLabel="Task views"
+          (tabSelect)="switchView($event)"
+        />
         <app-common-button class="shrink-0" label="New task" (buttonClick)="addTask()" />
       </div>
     </div>

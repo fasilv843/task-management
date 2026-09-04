@@ -69,17 +69,7 @@ export class TaskForm {
 
   readonly isUpdateMode = computed(() => this.mode() === TaskFormMode.UPDATE);
 
-  readonly taskId = computed(() => {
-    const rawId = this.routeId();
-
-    if (rawId === null) {
-      return null;
-    }
-
-    const parsedId = Number(rawId);
-
-    return Number.isInteger(parsedId) && parsedId > 0 ? parsedId : null;
-  });
+  readonly taskId = computed(() => this.routeId());
 
   readonly taskResource = rxResource({
     // Undefined params keep the resource idle, so create mode never fetches.

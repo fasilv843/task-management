@@ -45,13 +45,13 @@ export class TaskStore {
     return this.repo.fetchTasks().pipe(tap((tasks) => this.tasks.set(tasks)));
   }
 
-  getTaskById(id: number): Observable<Task | undefined>;
+  getTaskById(id: string): Observable<Task | undefined>;
   getTaskById(
-    id: number,
+    id: string,
     options: TaskQueryOptions & { comments: true },
   ): Observable<TaskWithComments | undefined>;
   getTaskById(
-    id: number,
+    id: string,
     options?: TaskQueryOptions,
   ): Observable<Task | TaskWithComments | undefined> {
     const taskRead = this.getTasks().pipe(map((tasks) => tasks.find((task) => task.id === id)));
@@ -75,8 +75,7 @@ export class TaskStore {
     // form is opened directly without visiting the list page.
     return this.getTasks().pipe(
       map((tasks) => {
-        const nextId = tasks.reduce((highest, task) => Math.max(highest, task.id), 0) + 1;
-        const created: Task = { ...draft, id: nextId };
+        const created: Task = { ...draft, id: crypto.randomUUID() };
 
         this.tasks.set([...tasks, created]);
 
@@ -85,7 +84,7 @@ export class TaskStore {
     );
   }
 
-  updateTask(id: number, draft: TaskDraft): Observable<Task> {
+  updateTask(id: string, draft: TaskDraft): Observable<Task> {
     return this.getTasks().pipe(
       map((tasks) => {
         const index = tasks.findIndex((task) => task.id === id);
@@ -105,7 +104,7 @@ export class TaskStore {
     );
   }
 
-  deleteTask(id: number): Observable<void> {
+  deleteTask(id: string): Observable<void> {
     return this.getTasks().pipe(
       map((tasks) => {
         this.tasks.set(tasks.filter((task) => task.id !== id));
@@ -122,7 +121,7 @@ export class TaskStore {
   }
 
   /** The comment thread for one task, in no particular order. */
-  getComments(taskId: number): Observable<TaskComment[]> {
+  getComments(taskId: string): Observable<TaskComment[]> {
     return this.loadComments().pipe(
       map((comments) => comments.filter((comment) => comment.taskId === taskId)),
     );
@@ -136,12 +135,9 @@ export class TaskStore {
   addComment(draft: CommentDraft): Observable<TaskComment> {
     return this.loadComments().pipe(
       map((comments) => {
-        const nextId =
-          comments.reduce((highest, comment) => Math.max(highest, comment.id), 0) + 1;
-
         const created: TaskComment = {
           ...draft,
-          id: nextId,
+          id: crypto.randomUUID(),
           createdAt: this.dateService.nowIso(),
         };
 

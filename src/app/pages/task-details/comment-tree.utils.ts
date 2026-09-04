@@ -9,7 +9,7 @@ import { CommentNode, TaskComment } from '../../services/comment.types';
  * matter how deep a thread runs.
  */
 export function buildCommentTree(comments: readonly TaskComment[]): CommentNode[] {
-  const nodesById = new Map<number, CommentNode>(
+  const nodesById = new Map<string, CommentNode>(
     comments.map((comment) => [comment.id, { ...comment, replies: [], depth: 0 }]),
   );
 

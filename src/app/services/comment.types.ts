@@ -22,10 +22,10 @@ export interface CommentRow {
  * the DOM node instead of failing.
  */
 export interface TaskComment {
-  id: number;
-  taskId: number;
+  id: string;
+  taskId: string;
   /** Null for a top-level comment, otherwise the comment this replies to. */
-  parentCommentId: number | null;
+  parentCommentId: string | null;
   /** Plain text. Rendered with whitespace preserved, never as markup. */
   text: string;
   /** ISO 8601 timestamp. */
@@ -44,6 +44,6 @@ export interface CommentNode extends TaskComment {
 
 /** A reply on its way up from the thread view to the page that saves it. */
 export interface CommentReply {
-  parentCommentId: number;
+  parentCommentId: string;
   text: string;
 }

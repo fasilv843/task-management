@@ -7,9 +7,9 @@ import { of } from 'rxjs';
 
 import { TaskDetails } from './task-details';
 import { CommentRow } from '../../services/comment.types';
-import { Task, TaskStatus } from '../../services/task.types';
+import { TaskRow, TaskStatus } from '../../services/task.types';
 
-const seedTasks: Task[] = [
+const seedTasks: TaskRow[] = [
   {
     id: 1,
     title: 'Design authentication flow',
@@ -174,7 +174,7 @@ describe('TaskDetails', () => {
     await fixture.whenStable();
     fixture.detectChanges();
 
-    expect(fixture.componentInstance.activeReplyId()).toBe(4);
+    expect(fixture.componentInstance.activeReplyId()).toBe('4');
 
     const forms = host.querySelectorAll<HTMLFormElement>('form');
     expect(forms.length).toBe(2);
@@ -220,15 +220,20 @@ describe('TaskDetails', () => {
     expect(text(fixture)).toContain("We couldn't find that task.");
   });
 
-  it('shows the not-found state for an unparseable id without fetching', async () => {
-    configure('not-a-number');
+  it('shows the not-found state for an id that matches no task', async () => {
+    configure('not-a-uuid');
 
     const fixture = TestBed.createComponent(TaskDetails);
     fixture.detectChanges();
+
+    const httpTesting = TestBed.inject(HttpTestingController);
+    httpTesting.expectOne('assets/tasks.json').flush(structuredClone(seedTasks));
+    // The task is missing, so the thread is never asked for.
+    httpTesting.expectNone('assets/comments.json');
+
     await fixture.whenStable();
     fixture.detectChanges();
 
-    TestBed.inject(HttpTestingController).expectNone('assets/tasks.json');
     expect(text(fixture)).toContain("We couldn't find that task.");
   });
 

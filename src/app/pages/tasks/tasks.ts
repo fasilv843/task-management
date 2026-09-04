@@ -4,17 +4,17 @@ import { Router } from '@angular/router';
 import { rxResource, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { CommonButton } from '../../components/common-button/common-button';
+import { CommonTab } from '../../components/common-tab/common-tab';
 import { ErrorState } from '../../components/error-state/error-state';
 import { RichTextContent } from '../../components/rich-text-content/rich-text-content';
-import { TaskViewSwitcher } from '../../components/task-view-switcher/task-view-switcher';
-import { TaskView } from '../../components/task-view-switcher/task-view-switcher.types';
 import { TaskStore } from '../../services/task-store';
 import { DateService } from '../../services/date-service';
 import { TASK_STATUS_LABELS, Task, TaskListItem, TaskStatus } from '../../services/task.types';
+import { TASK_VIEW_TABS } from '../../shared/task-view-tabs';
 
 @Component({
   selector: 'app-tasks',
-  imports: [DatePipe, CommonButton, ErrorState, RichTextContent, TaskViewSwitcher],
+  imports: [DatePipe, CommonButton, CommonTab, ErrorState, RichTextContent],
   templateUrl: './tasks.html',
   styleUrl: './tasks.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -26,8 +26,8 @@ export class Tasks {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly TaskStatus = TaskStatus;
-  readonly TaskView = TaskView;
   readonly statusLabels = TASK_STATUS_LABELS;
+  readonly viewTabs = TASK_VIEW_TABS;
 
   readonly tasksResource = rxResource({
     stream: () => this.taskStore.getTasks(),
@@ -52,6 +52,10 @@ export class Tasks {
   );
 
   readonly overdueCount = computed(() => this.taskItems().filter((task) => task.isOverdue).length);
+
+  switchView(id: string): void {
+    this.router.navigate(['/tasks', id]);
+  }
 
   // Absolute paths, not relative: this page lives at /tasks/list, so a relative
   // 'create' would resolve to /tasks/list/create.

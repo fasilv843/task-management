@@ -7,9 +7,9 @@ import { of } from 'rxjs';
 
 import { TaskForm } from './task-form';
 import { TaskFormMode } from './task-form.types';
-import { Task, TaskStatus } from '../../services/task.types';
+import { TaskRow, TaskStatus } from '../../services/task.types';
 
-const existingTask: Task = {
+const existingTask: TaskRow = {
   id: 1,
   title: 'Design authentication flow',
   description: '<p>Design the login flow.</p><ul><li>Define user flow</li></ul>',

@@ -44,17 +44,7 @@ export class TaskDetails {
     initialValue: null,
   });
 
-  readonly taskId = computed(() => {
-    const rawId = this.routeId();
-
-    if (rawId === null) {
-      return null;
-    }
-
-    const parsedId = Number(rawId);
-
-    return Number.isInteger(parsedId) && parsedId > 0 ? parsedId : null;
-  });
+  readonly taskId = computed(() => this.routeId());
 
   /**
    * One read for the whole page. `comments: true` is this fake API's
@@ -92,7 +82,7 @@ export class TaskDetails {
   });
 
   /** Which comment's reply box is open. Only ever one, so errors have one home. */
-  readonly activeReplyId = signal<number | null>(null);
+  readonly activeReplyId = signal<string | null>(null);
 
   readonly isSavingComment = signal(false);
 
@@ -113,7 +103,7 @@ export class TaskDetails {
     this.submitComment(reply.text, reply.parentCommentId);
   }
 
-  openReply(commentId: number): void {
+  openReply(commentId: string): void {
     // Reopening the same box closes it, and opening another moves the single
     // form rather than stacking a second one.
     this.activeReplyId.update((current) => (current === commentId ? null : commentId));
@@ -164,7 +154,7 @@ export class TaskDetails {
    * The single write path: a reply is just a comment with a parent, which is
    * what lets the thread nest without limit.
    */
-  private submitComment(text: string, parentCommentId: number | null): void {
+  private submitComment(text: string, parentCommentId: string | null): void {
     const taskId = this.taskId();
 
     if (taskId === null || this.isSavingComment()) {

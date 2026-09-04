@@ -33,7 +33,7 @@ export class TaskCalendar {
   readonly tasks = input.required<readonly Task[]>();
 
   /** Emits the id of the task whose event was activated. */
-  readonly taskSelect = output<number>();
+  readonly taskSelect = output<string>();
 
   private readonly dateLabelFormat = new Intl.DateTimeFormat(undefined, {
     day: 'numeric',
@@ -59,7 +59,7 @@ export class TaskCalendar {
     const colors = TASK_STATUS_EVENT_COLORS[task.status];
 
     return {
-      id: String(task.id),
+      id: task.id,
       title: task.title,
       // Already 'YYYY-MM-DD'; allDay keeps FullCalendar from shifting it across
       // a timezone boundary.
@@ -83,7 +83,7 @@ export class TaskCalendar {
     }
 
     arg.jsEvent.preventDefault();
-    this.taskSelect.emit(Number(arg.event.id));
+    this.taskSelect.emit(arg.event.id);
   }
 
   /**

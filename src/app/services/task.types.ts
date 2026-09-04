@@ -13,6 +13,19 @@ export const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
 };
 
 export interface Task {
+  id: string;
+  title: string;
+  description: string;
+  deadline: string;
+  status: TaskStatus;
+}
+
+/**
+ * A raw task row exactly as it sits in `tasks.json`: a numeric id, since the
+ * seed data predates UUIDs. `TaskRepo` maps it to a `Task` before anything
+ * else in the app sees it.
+ */
+export interface TaskRow {
   id: number;
   title: string;
   description: string;

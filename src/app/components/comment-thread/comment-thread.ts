@@ -42,13 +42,13 @@ export class CommentThread {
   readonly node = input.required<CommentNode>();
 
   /** Id of the comment whose reply box is open, if any. */
-  readonly activeReplyId = input<number | null>(null);
+  readonly activeReplyId = input<string | null>(null);
 
   readonly isSaving = input(false);
 
   readonly replyError = input<string | null>(null);
 
-  readonly replyRequested = output<number>();
+  readonly replyRequested = output<string>();
 
   readonly replyCancelled = output<void>();
 

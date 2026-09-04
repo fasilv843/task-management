@@ -21,14 +21,14 @@ const COMPLETED_DEADLINE = dayOfThisMonth(20);
 
 const TASKS: Task[] = [
   {
-    id: 1,
+    id: '1',
     title: 'Design the login flow',
     description: '<p>…</p>',
     deadline: IN_PROGRESS_DEADLINE,
     status: TaskStatus.IN_PROGRESS,
   },
   {
-    id: 2,
+    id: '2',
     title: 'Write release notes',
     description: '<p>…</p>',
     deadline: COMPLETED_DEADLINE,
@@ -97,14 +97,14 @@ describe('TaskCalendar', () => {
   });
 
   it('emits the task id instead of following the link', async () => {
-    const selected: number[] = [];
+    const selected: string[] = [];
     fixture.componentInstance.taskSelect.subscribe((id) => selected.push(id));
 
     const click = new MouseEvent('click', { bubbles: true, cancelable: true });
     eventFor('Write release notes').dispatchEvent(click);
     await fixture.whenStable();
 
-    expect(selected).toEqual([2]);
+    expect(selected).toEqual(['2']);
     expect(click.defaultPrevented).toBe(true);
   });
 
