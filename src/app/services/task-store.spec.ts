@@ -11,14 +11,14 @@ const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{
 
 const seedTasks: TaskRow[] = [
   {
-    id: 1,
+    id: '1',
     title: 'Design authentication flow',
     description: '<p>Design the login flow.</p>',
     deadline: '2099-01-15',
     status: TaskStatus.COMPLETED,
   },
   {
-    id: 2,
+    id: '2',
     title: 'Implement task list',
     description: '<p>Build the task list page.</p>',
     deadline: '2099-02-20',
@@ -28,22 +28,22 @@ const seedTasks: TaskRow[] = [
 
 const seedComments: CommentRow[] = [
   {
-    id: 1,
-    task_id: 1,
+    id: '1',
+    task_id: '1',
     parent_comment_id: null,
     text: 'Needs a validation pass.',
     created_at: '2099-01-01T09:00:00.000Z',
   },
   {
-    id: 2,
-    task_id: 1,
-    parent_comment_id: 1,
+    id: '2',
+    task_id: '1',
+    parent_comment_id: '1',
     text: 'Agreed.',
     created_at: '2099-01-01T10:00:00.000Z',
   },
   {
-    id: 3,
-    task_id: 2,
+    id: '3',
+    task_id: '2',
     parent_comment_id: null,
     text: 'Rows are in.',
     created_at: '2099-01-02T09:00:00.000Z',

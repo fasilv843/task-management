@@ -11,14 +11,14 @@ import { TaskRow, TaskStatus } from '../../services/task.types';
 
 const seedTasks: TaskRow[] = [
   {
-    id: 1,
+    id: '1',
     title: 'Design authentication flow',
     description: '<p>Design the login flow.</p>',
     deadline: '2099-01-15',
     status: TaskStatus.IN_PROGRESS,
   },
   {
-    id: 2,
+    id: '2',
     title: 'Implement task list',
     description: '<p>Build the task list page.</p>',
     deadline: '2099-02-20',
@@ -29,30 +29,30 @@ const seedTasks: TaskRow[] = [
 /** Task 1 carries one unbroken four-level chain; task 2 has none. */
 const seedComments: CommentRow[] = [
   {
-    id: 1,
-    task_id: 1,
+    id: '1',
+    task_id: '1',
     parent_comment_id: null,
     text: 'Level one',
     created_at: '2099-01-01T09:00:00.000Z',
   },
   {
-    id: 2,
-    task_id: 1,
-    parent_comment_id: 1,
+    id: '2',
+    task_id: '1',
+    parent_comment_id: '1',
     text: 'Level two',
     created_at: '2099-01-01T10:00:00.000Z',
   },
   {
-    id: 3,
-    task_id: 1,
-    parent_comment_id: 2,
+    id: '3',
+    task_id: '1',
+    parent_comment_id: '2',
     text: 'Level three',
     created_at: '2099-01-01T11:00:00.000Z',
   },
   {
-    id: 4,
-    task_id: 1,
-    parent_comment_id: 3,
+    id: '4',
+    task_id: '1',
+    parent_comment_id: '3',
     text: 'Level four',
     created_at: '2099-01-01T12:00:00.000Z',
   },

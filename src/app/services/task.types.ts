@@ -21,12 +21,12 @@ export interface Task {
 }
 
 /**
- * A raw task row exactly as it sits in `tasks.json`: a numeric id, since the
- * seed data predates UUIDs. `TaskRepo` maps it to a `Task` before anything
- * else in the app sees it.
+ * A raw task row exactly as it sits in `tasks.json`: a UUID primary key, the
+ * same shape a real table would hand back. `TaskRepo` maps it to a `Task`
+ * before anything else in the app sees it.
  */
 export interface TaskRow {
-  id: number;
+  id: string;
   title: string;
   description: string;
   deadline: string;

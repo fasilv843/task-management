@@ -1,41 +1,41 @@
 [
   {
-    "id": 1,
+    "id": "8f14e45f-ceea-4d0b-9d1c-4c1a4b6d1a01",
     "title": "Design authentication flow",
     "description": "<p>Design the login and registration flow for the application.</p><ul><li>Define user flow</li><li>Prepare validation rules</li><li>Document authentication states</li></ul>",
     "deadline": "2026-09-08",
     "status": "COMPLETED"
   },
   {
-    "id": 2,
+    "id": "b3d9f2a7-5c48-4e21-8a6f-2d7e9c0b1f02",
     "title": "Implement task list",
     "description": "<p>Build the task list page with support for viewing, adding, editing, and deleting tasks.</p>",
     "deadline": "2026-09-10",
     "status": "IN_PROGRESS"
   },
   {
-    "id": 3,
+    "id": "c07a1e64-9b32-4f8d-b5e0-6a3f8d2c4e03",
     "title": "Create task form",
     "description": "<p>Create a reusable reactive form for creating and editing tasks.</p><ul><li>Title</li><li>Description</li><li>Deadline</li><li>Status</li></ul>",
     "deadline": "2026-09-12",
     "status": "PENDING"
   },
   {
-    "id": 4,
+    "id": "d51b8c39-7a04-4c6e-9f2b-1e8d5a7b3c04",
     "title": "Add task details page",
     "description": "<p>Implement the task details page and display the complete information for the selected task.</p>",
     "deadline": "2026-09-14",
     "status": "PENDING"
   },
   {
-    "id": 5,
+    "id": "e6c2a48d-3f71-4b95-8d0a-7c4b6e1f9a05",
     "title": "Implement comments",
     "description": "<p>Add comments and unlimited nested replies to each task using a recursive comment component.</p>",
     "deadline": "2026-09-16",
     "status": "PENDING"
   },
   {
-    "id": 6,
+    "id": "fa39d70b-2e85-4a13-9c7d-5b0f3a8e2d06",
     "title": "Integrate calendar view",
     "description": "<p>Display tasks on a calendar according to their deadlines and navigate to task details when an event is selected.</p>",
     "deadline": "2026-08-20",

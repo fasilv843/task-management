@@ -10,9 +10,8 @@ import { Task, TaskRow } from './task.types';
  *
  * No caching, no mutation, no component-facing state — that is `TaskStore`'s
  * job. Everything here is a plain read of a static JSON file standing in for an
- * HTTP endpoint, which is also why the snake_case → camelCase translation (and
- * the numeric-id → UUID-shaped string translation) lives here: it is the
- * boundary where a wire format becomes a domain model.
+ * HTTP endpoint, which is also why the snake_case → camelCase translation lives
+ * here: it is the boundary where a wire format becomes a domain model.
  */
 @Injectable({
   providedIn: 'root',
@@ -37,7 +36,7 @@ export class TaskRepo {
 /** Maps one stored row onto the model the rest of the app works with. */
 function toTask(row: TaskRow): Task {
   return {
-    id: String(row.id),
+    id: row.id,
     title: row.title,
     description: row.description,
     deadline: row.deadline,
@@ -48,9 +47,9 @@ function toTask(row: TaskRow): Task {
 /** Maps one stored row onto the model the rest of the app works with. */
 function toTaskComment(row: CommentRow): TaskComment {
   return {
-    id: String(row.id),
-    taskId: String(row.task_id),
-    parentCommentId: row.parent_comment_id === null ? null : String(row.parent_comment_id),
+    id: row.id,
+    taskId: row.task_id,
+    parentCommentId: row.parent_comment_id,
     text: row.text,
     createdAt: row.created_at,
   };

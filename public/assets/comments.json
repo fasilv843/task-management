@@ -1,85 +1,85 @@
 [
   {
-    "id": 1,
-    "task_id": 1,
+    "id": "1a7c4e02-9b6d-4f38-8e51-3c9a7d2b4e11",
+    "task_id": "8f14e45f-ceea-4d0b-9d1c-4c1a4b6d1a01",
     "parent_comment_id": null,
     "text": "The registration path still needs a validation pass before this can close.",
     "created_at": "2026-08-28T09:15:00.000Z"
   },
   {
-    "id": 2,
-    "task_id": 1,
-    "parent_comment_id": 1,
+    "id": "2b8d5f13-0c7e-4a49-9f62-4d0b8e3c5f12",
+    "task_id": "8f14e45f-ceea-4d0b-9d1c-4c1a4b6d1a01",
+    "parent_comment_id": "1a7c4e02-9b6d-4f38-8e51-3c9a7d2b4e11",
     "text": "Agreed. I'll document the error states first so the copy is settled.",
     "created_at": "2026-08-28T11:40:00.000Z"
   },
   {
-    "id": 3,
-    "task_id": 1,
-    "parent_comment_id": 2,
+    "id": "3c9e6a24-1d8f-4b5a-8073-5e1c9f4d6a13",
+    "task_id": "8f14e45f-ceea-4d0b-9d1c-4c1a4b6d1a01",
+    "parent_comment_id": "2b8d5f13-0c7e-4a49-9f62-4d0b8e3c5f12",
     "text": "Include the locked-account case as well — it was missing from the last draft.",
     "created_at": "2026-08-28T14:05:00.000Z"
   },
   {
-    "id": 4,
-    "task_id": 1,
-    "parent_comment_id": 3,
+    "id": "4d0f7b35-2e90-4c6b-9184-6f2d0a5e7b14",
+    "task_id": "8f14e45f-ceea-4d0b-9d1c-4c1a4b6d1a01",
+    "parent_comment_id": "3c9e6a24-1d8f-4b5a-8073-5e1c9f4d6a13",
     "text": "Added. That brings the flow to five terminal states in total.",
     "created_at": "2026-08-29T08:20:00.000Z"
   },
   {
-    "id": 5,
-    "task_id": 1,
+    "id": "5e108c46-3f01-4d7c-a295-703e1b6f8c15",
+    "task_id": "8f14e45f-ceea-4d0b-9d1c-4c1a4b6d1a01",
     "parent_comment_id": null,
     "text": "Separately: should password reset live in this flow or get its own?",
     "created_at": "2026-08-30T10:00:00.000Z"
   },
   {
-    "id": 6,
-    "task_id": 1,
-    "parent_comment_id": 5,
+    "id": "6f219d57-4a12-4e8d-b3a6-814f2c709d16",
+    "task_id": "8f14e45f-ceea-4d0b-9d1c-4c1a4b6d1a01",
+    "parent_comment_id": "5e108c46-3f01-4d7c-a295-703e1b6f8c15",
     "text": "Its own. It has a different entry point and a different set of states.",
     "created_at": "2026-08-30T12:30:00.000Z"
   },
   {
-    "id": 7,
-    "task_id": 2,
+    "id": "7032ae68-5b23-4f9e-84b7-92503d81ae17",
+    "task_id": "b3d9f2a7-5c48-4e21-8a6f-2d7e9c0b1f02",
     "parent_comment_id": null,
     "text": "List rows are in. Still to do:\n\n- Empty state\n- Delete confirmation",
     "created_at": "2026-08-31T09:45:00.000Z"
   },
   {
-    "id": 8,
-    "task_id": 2,
-    "parent_comment_id": 7,
+    "id": "8143bf79-6c34-4a0f-95c8-a3614e92bf18",
+    "task_id": "b3d9f2a7-5c48-4e21-8a6f-2d7e9c0b1f02",
+    "parent_comment_id": "7032ae68-5b23-4f9e-84b7-92503d81ae17",
     "text": "Both are done now — the confirmation reuses the browser dialog for the moment.",
     "created_at": "2026-09-01T15:10:00.000Z"
   },
   {
-    "id": 9,
-    "task_id": 2,
+    "id": "9254c08a-7d45-4b10-86d9-b4725fa3c019",
+    "task_id": "b3d9f2a7-5c48-4e21-8a6f-2d7e9c0b1f02",
     "parent_comment_id": null,
     "text": "Worth checking the overdue styling against the contrast minimums.",
     "created_at": "2026-09-02T08:05:00.000Z"
   },
   {
-    "id": 10,
-    "task_id": 3,
+    "id": "a365d19b-8e56-4c21-97ea-c58360b4d11a",
+    "task_id": "c07a1e64-9b32-4f8d-b5e0-6a3f8d2c4e03",
     "parent_comment_id": null,
     "text": "Blocked until the list page settles — the form shares its status options.",
     "created_at": "2026-09-01T13:25:00.000Z"
   },
   {
-    "id": 11,
-    "task_id": 4,
+    "id": "b476e2ac-9f67-4d32-a8fb-d69471c5e21b",
+    "task_id": "d51b8c39-7a04-4c6e-9f2b-1e8d5a7b3c04",
     "parent_comment_id": null,
     "text": "Replies need to nest without a depth limit, so the view has to recurse.",
     "created_at": "2026-09-02T16:50:00.000Z"
   },
   {
-    "id": 12,
-    "task_id": 4,
-    "parent_comment_id": 11,
+    "id": "c587f3bd-a078-4e43-b90c-e70582d6f31c",
+    "task_id": "d51b8c39-7a04-4c6e-9f2b-1e8d5a7b3c04",
+    "parent_comment_id": "b476e2ac-9f67-4d32-a8fb-d69471c5e21b",
     "text": "A flat table with a parent_comment_id is enough — the tree is built on read.",
     "created_at": "2026-09-03T09:30:00.000Z"
   }

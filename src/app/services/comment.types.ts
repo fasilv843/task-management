@@ -1,15 +1,15 @@
 /**
- * A row exactly as it sits in `comments.json`: SQL column names, foreign keys by
- * id, no nesting. `parent_comment_id` is a self-reference — null at the root of
- * a thread, otherwise the comment being replied to.
+ * A row exactly as it sits in `comments.json`: SQL column names, UUID keys and
+ * foreign keys, no nesting. `parent_comment_id` is a self-reference — null at
+ * the root of a thread, otherwise the comment being replied to.
  *
  * This shape exists only at the API boundary. `TaskRepo` maps it before anything
  * else in the app sees it.
  */
 export interface CommentRow {
-  id: number;
-  task_id: number;
-  parent_comment_id: number | null;
+  id: string;
+  task_id: string;
+  parent_comment_id: string | null;
   text: string;
   created_at: string;
 }
