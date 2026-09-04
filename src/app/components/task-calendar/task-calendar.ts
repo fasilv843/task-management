@@ -7,6 +7,9 @@ import { DateService } from '../../services/date-service';
 import { TASK_STATUS_LABELS, Task } from '../../services/task.types';
 import { TASK_STATUS_EVENT_COLORS, TaskEventProps } from './task-calendar.types';
 
+// TODO - update the name TaskCalendar to Calendar 
+// TODO - remove task logic, make sure this will be reusable for all kind of calendar usage
+
 /**
  * TaskCalendar
  *
