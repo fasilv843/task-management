@@ -14,7 +14,7 @@ import { TASK_VIEW_TABS } from '../../shared/task-view-tabs';
 
 @Component({
   selector: 'app-tasks',
-  imports: [DatePipe, CommonButton, CommonTab, ErrorState, RichTextContent],
+  imports: [DatePipe, CommonButton, ErrorState, RichTextContent],
   templateUrl: './tasks.html',
   styleUrl: './tasks.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

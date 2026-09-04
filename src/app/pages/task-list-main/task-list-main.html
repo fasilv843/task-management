@@ -1,0 +1,26 @@
+<div class="mx-auto max-w-3xl px-6 py-10">
+  <header class="mb-8 border-b border-rule pb-6">
+    <div class="flex flex-wrap items-center justify-between gap-4">
+      <h1 class="text-[28px] font-semibold leading-tight text-ink">
+        Tasks
+      </h1>
+
+      <div class="flex flex-wrap items-center gap-4">
+        <app-common-tab
+          [tabs]="viewTabs"
+          [active]="activeView()"
+          ariaLabel="Task views"
+          (tabSelect)="switchView($event)"
+        />
+
+        <app-common-button
+          class="shrink-0"
+          label="New task"
+          (buttonClick)="addTask()"
+        />
+      </div>
+    </div>
+  </header>
+
+  <router-outlet />
+</div>
