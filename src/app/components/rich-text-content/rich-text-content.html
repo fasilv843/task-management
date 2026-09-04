@@ -1,0 +1,27 @@
+@if (renderedHtml()) {
+  <div
+    #clip
+    [id]="contentId"
+    class="rich-text-content"
+    [class.rich-text-content--clipped]="!isExpanded()"
+  >
+    <div #body [innerHTML]="renderedHtml()"></div>
+
+    @if (!isExpanded() && isOverflowing()) {
+      <div class="rich-text-content__fade" aria-hidden="true"></div>
+    }
+  </div>
+
+  @if (isOverflowing()) {
+    <button
+      type="button"
+      class="mt-1.5 cursor-pointer text-sm text-ink underline-offset-2 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+      [attr.aria-expanded]="isExpanded()"
+      [attr.aria-controls]="contentId"
+      [attr.aria-label]="toggleAccessibleName()"
+      (click)="toggle()"
+    >
+      {{ toggleLabel() }}
+    </button>
+  }
+}

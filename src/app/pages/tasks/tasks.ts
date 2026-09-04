@@ -1,15 +1,16 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { rxResource, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
+import { RichTextContent } from '../../components/rich-text-content/rich-text-content';
 import { TaskService } from '../../services/task-service';
 import { DateService } from '../../services/date-service';
 import { TASK_STATUS_LABELS, Task, TaskListItem, TaskStatus } from '../../services/task.types';
 
 @Component({
   selector: 'app-tasks',
-  imports: [DatePipe],
+  imports: [DatePipe, RichTextContent],
   templateUrl: './tasks.html',
   styleUrl: './tasks.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -19,6 +20,7 @@ export class Tasks {
   private readonly dateService = inject(DateService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly TaskStatus = TaskStatus;
   readonly statusLabels = TASK_STATUS_LABELS;
@@ -65,6 +67,11 @@ export class Tasks {
       return;
     }
 
-    this.tasksResource.update((tasks) => tasks?.filter((t) => t.id !== task.id));
+    // Goes through the service so the store stays the single source of truth —
+    // a purely local removal would reappear on the next navigation.
+    this.taskService
+      .deleteTask(task.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.tasksResource.reload());
   }
 }

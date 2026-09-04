@@ -1,1 +1,165 @@
-<p>task-form works!</p>
+<div class="mx-auto max-w-3xl px-6 py-10">
+  <header class="mb-8 border-b border-rule pb-6">
+    <h1 class="text-[28px] font-semibold leading-tight text-ink">{{ pageTitle() }}</h1>
+    <p class="mt-1 text-sm text-ink-soft">
+      @if (mode() === TaskFormMode.CREATE) {
+        Add a new task to your list.
+      } @else {
+        Update the details of this task.
+      }
+    </p>
+  </header>
+
+  @if (isLoadingTask()) {
+    <div aria-busy="true" aria-label="Loading task">
+      <div class="task-skeleton h-4 w-24 bg-rule"></div>
+      <div class="task-skeleton mt-3 h-10 w-full bg-rule"></div>
+      <div class="task-skeleton mt-8 h-4 w-32 bg-rule"></div>
+      <div class="task-skeleton mt-3 h-40 w-full bg-rule"></div>
+      <div class="task-skeleton mt-8 h-4 w-20 bg-rule"></div>
+      <div class="task-skeleton mt-3 h-10 w-full bg-rule"></div>
+    </div>
+  } @else if (loadError()) {
+    <div
+      class="border border-status-overdue-ink bg-status-overdue-bg px-6 py-8 text-center"
+      role="alert"
+    >
+      <p class="font-medium text-ink">Couldn't load this task.</p>
+      <p class="mt-1 text-sm text-ink-soft">Check your connection and try again.</p>
+      <button
+        type="button"
+        class="mt-4 cursor-pointer border border-ink px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-ink hover:text-paper focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+        (click)="taskResource.reload()"
+      >
+        Retry
+      </button>
+    </div>
+  } @else if (isTaskMissing()) {
+    <div class="border border-dashed border-rule px-6 py-14 text-center" role="alert">
+      <p class="font-medium text-ink">We couldn't find that task.</p>
+      <p class="mt-1 text-sm text-ink-soft">It may have been deleted.</p>
+      <button
+        type="button"
+        class="mt-4 cursor-pointer border border-ink bg-ink px-4 py-2 text-sm font-medium text-paper transition-colors hover:bg-paper hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+        (click)="onCancel()"
+      >
+        Back to tasks
+      </button>
+    </div>
+  } @else {
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+      <!-- Title -->
+      <div class="mb-8">
+        <label for="task-title" class="block text-sm font-medium text-ink">Title</label>
+        <input
+          id="task-title"
+          type="text"
+          formControlName="title"
+          autocomplete="off"
+          class="mt-2 block w-full border bg-surface px-3 py-2 text-ink transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+          [class.border-rule]="!titleHasError()"
+          [class.border-status-overdue-ink]="titleHasError()"
+          [attr.aria-invalid]="titleHasError() ? 'true' : null"
+          [attr.aria-describedby]="titleHasError() ? 'task-title-error' : null"
+        />
+        <app-form-validation-error
+          fieldId="task-title-error"
+          [control]="form.controls.title"
+          [messages]="titleErrorMessages"
+        />
+      </div>
+
+      <!-- Description -->
+      <div class="mb-8">
+        <span id="task-description-label" class="block text-sm font-medium text-ink">
+          Description
+        </span>
+
+        <app-rich-text-editor
+          class="mt-2"
+          formControlName="description"
+          placeholder="Describe the task…"
+          labelledBy="task-description-label"
+          describedBy="task-description-error"
+          [invalid]="descriptionHasError()"
+        />
+
+        <app-form-validation-error
+          fieldId="task-description-error"
+          [control]="form.controls.description"
+          [messages]="descriptionErrorMessages"
+        />
+      </div>
+
+      <!-- Deadline -->
+      <div class="mb-8">
+        <label for="task-deadline" class="block text-sm font-medium text-ink">Deadline</label>
+        <input
+          id="task-deadline"
+          type="date"
+          formControlName="deadline"
+          class="mt-2 block w-full border bg-surface px-3 py-2 font-mono text-ink transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+          [class.border-rule]="!deadlineHasError()"
+          [class.border-status-overdue-ink]="deadlineHasError()"
+          [attr.aria-invalid]="deadlineHasError() ? 'true' : null"
+          [attr.aria-describedby]="deadlineHasError() ? 'task-deadline-error' : null"
+        />
+        <app-form-validation-error
+          fieldId="task-deadline-error"
+          [control]="form.controls.deadline"
+          [messages]="deadlineErrorMessages"
+        />
+      </div>
+
+      <!-- Status -->
+      <div class="mb-8">
+        <label for="task-status" class="block text-sm font-medium text-ink">Status</label>
+        <select
+          id="task-status"
+          formControlName="status"
+          class="mt-2 block w-full border bg-surface px-3 py-2 text-ink transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+          [class.border-rule]="!statusHasError()"
+          [class.border-status-overdue-ink]="statusHasError()"
+          [attr.aria-invalid]="statusHasError() ? 'true' : null"
+          [attr.aria-describedby]="statusHasError() ? 'task-status-error' : null"
+        >
+          @for (option of statusOptions; track option.value) {
+            <option [value]="option.value">{{ option.label }}</option>
+          }
+        </select>
+        <app-form-validation-error
+          fieldId="task-status-error"
+          [control]="form.controls.status"
+          [messages]="statusErrorMessages"
+        />
+      </div>
+
+      @if (saveError()) {
+        <div
+          class="mb-6 border border-status-overdue-ink bg-status-overdue-bg px-4 py-3 text-sm text-ink"
+          role="alert"
+        >
+          {{ saveError() }}
+        </div>
+      }
+
+      <div class="flex flex-wrap items-center gap-3 border-t border-rule pt-6">
+        <button
+          type="submit"
+          class="cursor-pointer border border-ink bg-ink px-4 py-2 text-sm font-medium text-paper transition-colors hover:bg-paper hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:cursor-not-allowed disabled:opacity-60"
+          [disabled]="isSaving()"
+        >
+          {{ isSaving() ? 'Saving…' : submitLabel() }}
+        </button>
+
+        <button
+          type="button"
+          class="cursor-pointer border border-rule px-4 py-2 text-sm font-medium text-ink transition-colors hover:border-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+          (click)="onCancel()"
+        >
+          Cancel
+        </button>
+      </div>
+    </form>
+  }
+</div>

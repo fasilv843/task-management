@@ -1,0 +1,86 @@
+/*
+ * The editor builds its toolbar and editing body outside this component's
+ * template, so Angular's encapsulation attribute never lands on those nodes.
+ * ::ng-deep is required here; every selector is scoped under :host so nothing
+ * escapes into other components.
+ */
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+/*
+ * The editor element ships no styles of its own, so it defaults to display:
+ * inline and never stretches — leaving the toolbar and editing area collapsed
+ * to their content width instead of matching the other inputs.
+ */
+quill-editor {
+  display: block;
+  width: 100%;
+}
+
+:host ::ng-deep .ql-toolbar.ql-snow,
+:host ::ng-deep .ql-container.ql-snow {
+  width: 100%;
+  border-color: var(--color-rule);
+  border-radius: 0;
+  font-family: var(--font-sans);
+}
+
+:host ::ng-deep .ql-toolbar.ql-snow {
+  background-color: var(--color-paper);
+  border-bottom-width: 0;
+}
+
+:host ::ng-deep .ql-container.ql-snow {
+  background-color: var(--color-surface);
+  font-size: 0.9375rem;
+}
+
+:host ::ng-deep .ql-editor {
+  min-height: var(--rich-text-editor-min-height, 11rem);
+  color: var(--color-ink);
+  line-height: 1.6;
+}
+
+:host ::ng-deep .ql-editor.ql-blank::before {
+  color: var(--color-ink-soft);
+  font-style: normal;
+}
+
+/* The editor renders list markers itself; restore the spacing the reset removes. */
+:host ::ng-deep .ql-editor ul,
+:host ::ng-deep .ql-editor ol {
+  padding-left: 1.5em;
+}
+
+/* Toolbar buttons need a visible focus ring for keyboard users (WCAG AA). */
+:host ::ng-deep .ql-toolbar button:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* The default icon stroke has too little contrast against our paper tone. */
+:host ::ng-deep .ql-snow .ql-stroke {
+  stroke: var(--color-ink-soft);
+}
+
+:host ::ng-deep .ql-snow .ql-fill {
+  fill: var(--color-ink-soft);
+}
+
+:host ::ng-deep .ql-snow button:hover .ql-stroke,
+:host ::ng-deep .ql-snow button.ql-active .ql-stroke {
+  stroke: var(--color-accent-ink);
+}
+
+:host ::ng-deep .ql-snow button:hover .ql-fill,
+:host ::ng-deep .ql-snow button.ql-active .ql-fill {
+  fill: var(--color-accent-ink);
+}
+
+:host(.rich-text-editor--invalid) ::ng-deep .ql-toolbar.ql-snow,
+:host(.rich-text-editor--invalid) ::ng-deep .ql-container.ql-snow {
+  border-color: var(--color-status-overdue-ink);
+}

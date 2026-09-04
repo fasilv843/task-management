@@ -1,28 +1,22 @@
 import { Routes } from '@angular/router';
-import { Tasks } from './pages/tasks/tasks';
-import { TaskDetails } from './pages/task-details/task-details';
-import { TaskForm } from './pages/task-form/task-form';
 
 export const routes: Routes = [
     {
         path: 'tasks',
-        component: Tasks,
+        loadComponent: () => import('./pages/tasks/tasks').then((m) => m.Tasks),
     },
+    // Must stay above 'tasks/:id', otherwise 'create' matches the details route.
     {
         path: 'tasks/create',
-        component: TaskForm,
+        loadComponent: () => import('./pages/task-form/task-form').then((m) => m.TaskForm),
     },
     {
         path: 'tasks/update/:id',
-        component: TaskForm,
+        loadComponent: () => import('./pages/task-form/task-form').then((m) => m.TaskForm),
     },
     {
         path: 'tasks/:id',
-        component: TaskDetails,
+        loadComponent: () => import('./pages/task-details/task-details').then((m) => m.TaskDetails),
     },
-    {
-        path: '',
-        pathMatch: 'full',
-        redirectTo: 'tasks'
-    }
+    { path: '', pathMatch: 'full', redirectTo: 'tasks' }
 ];

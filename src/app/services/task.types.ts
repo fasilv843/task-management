@@ -21,3 +21,6 @@ export interface Task {
 export interface TaskListItem extends Task {
   isOverdue: boolean;
 }
+
+/** Payload used to create or update a task. The id is assigned by the store. */
+export type TaskDraft = Omit<Task, 'id'>;

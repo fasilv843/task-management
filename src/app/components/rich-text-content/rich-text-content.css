@@ -1,0 +1,74 @@
+/*
+ * The rendered text is written into the DOM with [innerHTML], so Angular's
+ * encapsulation attribute never lands on those nodes. ::ng-deep is required
+ * here; every selector is scoped under :host so nothing escapes.
+ */
+
+:host {
+  display: block;
+  /* Pasted URLs and other unbroken strings must not widen the layout. */
+  overflow-wrap: break-word;
+}
+
+.rich-text-content--clipped {
+  position: relative;
+  max-height: var(--rich-text-collapsed-height, 6rem);
+  overflow: hidden;
+}
+
+/*
+ * Signals that the text is cut rather than finished. Only the opacity is
+ * animated — transitioning an unknown max-height is what makes expanders janky.
+ */
+.rich-text-content__fade {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 2rem;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    var(--rich-text-fade-color, var(--color-paper))
+  );
+  pointer-events: none;
+  animation: rich-text-fade-in 150ms ease;
+}
+
+@keyframes rich-text-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rich-text-content__fade {
+    animation: none;
+  }
+}
+
+/* The base reset strips block spacing and list markers; restore them here. */
+:host ::ng-deep .rich-text-content :where(p, ul, ol) {
+  margin: 0;
+}
+
+:host ::ng-deep .rich-text-content :where(p, ul, ol) + :where(p, ul, ol) {
+  margin-top: 0.5em;
+}
+
+:host ::ng-deep .rich-text-content ul {
+  padding-left: 1.25em;
+  list-style: disc;
+}
+
+:host ::ng-deep .rich-text-content ol {
+  padding-left: 1.5em;
+  list-style: decimal;
+}
+
+:host ::ng-deep .rich-text-content li {
+  margin-top: 0.15em;
+}
