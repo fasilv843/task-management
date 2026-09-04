@@ -10,7 +10,8 @@
 
     <button
       class="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white
-             hover:bg-gray-800">
+             hover:bg-gray-800"
+      (click)="addTask()">
       + Add Task
     </button>
   </div>
@@ -71,19 +72,22 @@
 
               <button
                 class="rounded border border-gray-200 px-3 py-1.5 text-sm
-                       hover:bg-gray-50">
+                       hover:bg-gray-50"
+                (click)="viewTask(task)">
                 View
               </button>
 
               <button
                 class="rounded border border-gray-200 px-3 py-1.5 text-sm
-                       hover:bg-gray-50">
+                       hover:bg-gray-50"
+                (click)="editTask(task)">
                 Edit
               </button>
 
               <button
                 class="rounded border border-red-200 px-3 py-1.5 text-sm
-                       text-red-600 hover:bg-red-50">
+                       text-red-600 hover:bg-red-50"
+                (click)="deleteTask(task)">
                 Delete
               </button>
 
