@@ -2,17 +2,6 @@ import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 
 import { DateService } from '../../services/date-service';
 
-/** Rejects values that are empty once surrounding whitespace is removed. */
-export function nonBlank(control: AbstractControl): ValidationErrors | null {
-  const value: unknown = control.value;
-
-  if (typeof value !== 'string' || value.trim().length > 0) {
-    return null;
-  }
-
-  return { nonBlank: true };
-}
-
 /**
  * Rejects a `YYYY-MM-DD` deadline that falls before today.
  *

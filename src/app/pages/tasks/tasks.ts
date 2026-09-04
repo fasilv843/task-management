@@ -3,20 +3,21 @@ import { DatePipe } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { rxResource, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
+import { CommonButton } from '../../components/common-button/common-button';
 import { RichTextContent } from '../../components/rich-text-content/rich-text-content';
-import { TaskService } from '../../services/task-service';
+import { TaskStore } from '../../services/task-store';
 import { DateService } from '../../services/date-service';
 import { TASK_STATUS_LABELS, Task, TaskListItem, TaskStatus } from '../../services/task.types';
 
 @Component({
   selector: 'app-tasks',
-  imports: [DatePipe, RichTextContent],
+  imports: [DatePipe, CommonButton, RichTextContent],
   templateUrl: './tasks.html',
   styleUrl: './tasks.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Tasks {
-  private readonly taskService = inject(TaskService);
+  private readonly taskStore = inject(TaskStore);
   private readonly dateService = inject(DateService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
@@ -26,7 +27,7 @@ export class Tasks {
   readonly statusLabels = TASK_STATUS_LABELS;
 
   readonly tasksResource = rxResource({
-    stream: () => this.taskService.getTasks(),
+    stream: () => this.taskStore.getTasks(),
   });
 
   readonly taskItems = computed<TaskListItem[]>(() => {
@@ -69,7 +70,7 @@ export class Tasks {
 
     // Goes through the service so the store stays the single source of truth —
     // a purely local removal would reappear on the next navigation.
-    this.taskService
+    this.taskStore
       .deleteTask(task.id)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.tasksResource.reload());

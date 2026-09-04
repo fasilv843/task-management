@@ -1,27 +1,37 @@
-<quill-editor
-  [formControl]="innerControl"
-  format="html"
-  theme="snow"
-  [placeholder]="placeholder()"
-  [formats]="allowedFormats()"
-  (onEditorCreated)="onEditorCreated($event)"
-  (onBlur)="onEditorBlur()"
+<app-form-field
+  [label]="label()"
+  [labelId]="labelId()"
+  [labelHidden]="labelHidden()"
+  [hint]="hint()"
+  [hintId]="hintId()"
+  [errorId]="errorId()"
+  [message]="message()"
 >
-  <!--
-    A custom toolbar rather than the editor's default: the stock buttons ship
-    with no accessible name, which fails AXE. The [quill-editor-toolbar]
-    attribute is what the editor looks for to adopt this markup.
-  -->
-  <div quill-editor-toolbar>
-    <span class="ql-formats">
-      @for (control of controls(); track control) {
-        <button
-          type="button"
-          [class]="controlConfig[control].buttonClass"
-          [attr.value]="controlConfig[control].value"
-          [attr.aria-label]="controlLabels[control]"
-        ></button>
-      }
-    </span>
-  </div>
-</quill-editor>
+  <quill-editor
+    [formControl]="innerControl"
+    format="html"
+    theme="snow"
+    [placeholder]="placeholder()"
+    [formats]="allowedFormats()"
+    (onEditorCreated)="onEditorCreated($event)"
+    (onBlur)="onEditorBlur()"
+  >
+    <!--
+      A custom toolbar rather than the editor's default: the stock buttons ship
+      with no accessible name, which fails AXE. The [quill-editor-toolbar]
+      attribute is what the editor looks for to adopt this markup.
+    -->
+    <div quill-editor-toolbar>
+      <span class="ql-formats">
+        @for (control of controls(); track control) {
+          <button
+            type="button"
+            [class]="controlConfig[control].buttonClass"
+            [attr.value]="controlConfig[control].value"
+            [attr.aria-label]="controlLabels[control]"
+          ></button>
+        }
+      </span>
+    </div>
+  </quill-editor>
+</app-form-field>

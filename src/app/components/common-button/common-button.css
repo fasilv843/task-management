@@ -1,3 +1,56 @@
-/* Styling is handled entirely via Tailwind utility classes in common-button.ts.
-   Add overrides here only if a case truly can't be expressed with the
-   variant/tone/size inputs. */
+/* Points at the project stylesheet, not bare 'tailwindcss', so `@apply` can
+   resolve the @theme tokens declared there (accent, ink, rule, status-*).
+   It emits no CSS of its own. */
+@reference '../../../styles.css';
+
+/* Every button in the app is one of these. The look is selected in
+   common-button.ts by joining `btn` with `btn--<variant>`, `btn--<size>` and
+   `btn--<tone>`; nothing here is meant to be overridden per page. */
+
+.btn {
+  @apply inline-flex cursor-pointer items-center justify-center gap-1.5 font-medium
+    transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-50
+    focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2
+    focus-visible:outline-accent;
+}
+
+/* Sizes apply to the boxed variants only — `link` stays inline with its text. */
+.btn--sm {
+  @apply px-3 py-1.5 text-xs;
+}
+
+.btn--md {
+  @apply px-4 py-2 text-sm;
+}
+
+.btn--filled {
+  @apply border border-ink bg-ink text-paper hover:bg-paper hover:text-ink;
+}
+
+.btn--filled.btn--danger {
+  @apply border-status-overdue-ink bg-status-overdue-ink text-paper hover:bg-paper
+    hover:text-status-overdue-ink;
+}
+
+.btn--outline {
+  @apply border border-ink bg-transparent text-ink hover:bg-ink hover:text-paper;
+}
+
+.btn--outline.btn--danger {
+  @apply border-status-overdue-ink text-status-overdue-ink hover:bg-status-overdue-ink
+    hover:text-paper;
+}
+
+/* A quieter box for secondary actions sitting next to a filled one (Cancel). */
+.btn--subtle {
+  @apply border border-rule bg-transparent text-ink hover:border-ink;
+}
+
+/* Inherits font-size from its surroundings so it reads as part of the text. */
+.btn--link {
+  @apply border-0 bg-transparent p-0 text-ink underline-offset-2 hover:underline;
+}
+
+.btn--link.btn--danger {
+  @apply text-status-overdue-ink;
+}

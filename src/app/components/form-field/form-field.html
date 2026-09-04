@@ -1,0 +1,15 @@
+@if (labelFor()) {
+  <label [attr.for]="labelFor()" [attr.id]="labelId()" [class]="labelClass()">{{ label() }}</label>
+} @else {
+  <span [attr.id]="labelId()" [class]="labelClass()">{{ label() }}</span>
+}
+
+<div [class]="labelHidden() ? '' : 'mt-2'">
+  <ng-content />
+</div>
+
+@if (hint()) {
+  <p [attr.id]="hintId()" class="mt-1 text-xs text-ink-soft">{{ hint() }}</p>
+}
+
+<app-form-validation-error [fieldId]="errorId()" [message]="message()" />

@@ -9,15 +9,14 @@ import {
   input,
   signal,
 } from '@angular/core';
-import {
-  ControlValueAccessor,
-  FormControl,
-  NG_VALUE_ACCESSOR,
-  ReactiveFormsModule,
-} from '@angular/forms';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { QuillEditorComponent } from 'ngx-quill';
 
+import { FormField } from '../form-field/form-field';
+import { BaseFormControl } from '../../shared/base-form-control';
+import { FocusableFormField } from '../../shared/focusable-form-field';
+import { InvalidFieldDirective } from '../../shared/directives/invalid-field.directive';
 import {
   DEFAULT_RICH_TEXT_CONTROLS,
   RICH_TEXT_CONTROL_CONFIG,
@@ -31,36 +30,30 @@ import {
  * Usage:
  * ```html
  * <app-rich-text-editor
+ *   label="Description"
  *   formControlName="description"
  *   [controls]="[RichTextControl.BOLD, RichTextControl.BULLET_LIST]"
- *   [invalid]="showsError()"
- *   labelledBy="description-label"
  *   placeholder="Describe the task…"
  * />
  * ```
  *
  * Nothing about the underlying editor library leaks to callers, so it can be
- * swapped without touching consumers.
+ * swapped without touching consumers. Label, message and error treatment are
+ * inherited from `BaseFormControl`, so it behaves like every other field.
  */
 @Component({
   selector: 'app-rich-text-editor',
-  imports: [ReactiveFormsModule, QuillEditorComponent],
+  imports: [ReactiveFormsModule, QuillEditorComponent, FormField],
   templateUrl: './rich-text-editor.html',
   styleUrl: './rich-text-editor.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  hostDirectives: [InvalidFieldDirective],
+  providers: [{ provide: FocusableFormField, useExisting: forwardRef(() => RichTextEditor) }],
   host: {
     '[style.--rich-text-editor-min-height]': 'minHeight()',
-    '[class.rich-text-editor--invalid]': 'invalid()',
   },
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => RichTextEditor),
-      multi: true,
-    },
-  ],
 })
-export class RichTextEditor implements ControlValueAccessor {
+export class RichTextEditor extends BaseFormControl<string> {
   private readonly destroyRef = inject(DestroyRef);
 
   /** Formatting buttons to offer, in the order given. */
@@ -70,15 +63,6 @@ export class RichTextEditor implements ControlValueAccessor {
 
   /** Minimum height of the editing area, as a CSS length. */
   readonly minHeight = input('11rem');
-
-  /** Id of the element labelling this editor. */
-  readonly labelledBy = input<string | null>(null);
-
-  /** Id of the element describing this editor, typically its validation message. */
-  readonly describedBy = input<string | null>(null);
-
-  /** Renders the error treatment and exposes `aria-invalid` to assistive tech. */
-  readonly invalid = input(false);
 
   readonly controlLabels = RICH_TEXT_CONTROL_LABELS;
   readonly controlConfig = RICH_TEXT_CONTROL_CONFIG;
@@ -98,9 +82,9 @@ export class RichTextEditor implements ControlValueAccessor {
 
   private readonly editorRoot = signal<HTMLElement | null>(null);
 
-  private onTouched: () => void = () => {};
-
   constructor() {
+    super();
+
     // Mirrored onto the editor body rather than bound in the template: the
     // contenteditable is built by the editor, outside this component's view.
     effect(() => {
@@ -110,30 +94,49 @@ export class RichTextEditor implements ControlValueAccessor {
         return;
       }
 
-      if (this.invalid()) {
-        editorRoot.setAttribute('aria-invalid', 'true');
-      } else {
-        editorRoot.removeAttribute('aria-invalid');
-      }
+      this.applyAttribute(editorRoot, 'aria-invalid', this.hasError() ? 'true' : null);
     });
 
     effect(() => {
       const editorRoot = this.editorRoot();
-      const labelledBy = this.labelledBy();
-      const describedBy = this.describedBy();
 
       if (!editorRoot) {
         return;
       }
 
-      this.applyAttribute(editorRoot, 'aria-labelledby', labelledBy);
-      this.applyAttribute(editorRoot, 'aria-describedby', describedBy);
+      this.applyAttribute(editorRoot, 'aria-labelledby', this.labelId());
+      this.applyAttribute(editorRoot, 'aria-describedby', this.describedBy());
     });
   }
 
   /** Moves focus into the editing area. */
   focus(): void {
     this.editorRoot()?.focus();
+  }
+
+  override writeValue(value: string | null): void {
+    super.writeValue(value);
+
+    // emitEvent: false — this is the form pushing a value in, not a user edit.
+    this.innerControl.setValue(value ?? '', { emitEvent: false });
+  }
+
+  override registerOnChange(onChange: (value: string | null) => void): void {
+    super.registerOnChange(onChange);
+
+    this.innerControl.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((value) => onChange(value));
+  }
+
+  override setDisabledState(isDisabled: boolean): void {
+    super.setDisabledState(isDisabled);
+
+    if (isDisabled) {
+      this.innerControl.disable({ emitEvent: false });
+    } else {
+      this.innerControl.enable({ emitEvent: false });
+    }
   }
 
   protected onEditorCreated(editor: { root: HTMLElement }): void {
@@ -147,29 +150,6 @@ export class RichTextEditor implements ControlValueAccessor {
 
   protected onEditorBlur(): void {
     this.onTouched();
-  }
-
-  writeValue(value: string | null): void {
-    // emitEvent: false — this is the form pushing a value in, not a user edit.
-    this.innerControl.setValue(value ?? '', { emitEvent: false });
-  }
-
-  registerOnChange(onChange: (value: string | null) => void): void {
-    this.innerControl.valueChanges
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((value) => onChange(value));
-  }
-
-  registerOnTouched(onTouched: () => void): void {
-    this.onTouched = onTouched;
-  }
-
-  setDisabledState(isDisabled: boolean): void {
-    if (isDisabled) {
-      this.innerControl.disable({ emitEvent: false });
-    } else {
-      this.innerControl.enable({ emitEvent: false });
-    }
   }
 
   private applyAttribute(element: HTMLElement, name: string, value: string | null): void {

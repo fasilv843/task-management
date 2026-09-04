@@ -1,75 +1,55 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
-import { AbstractControl, FormGroupDirective } from '@angular/forms';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { merge, switchMap } from 'rxjs';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { AbstractControl } from '@angular/forms';
 
-import { isErrorVisible } from './form-validation-error.utils';
+import { createControlErrorState } from '../../shared/form-error-state';
+import { ValidationMessages } from '../../shared/validation.types';
 
 /**
  * Renders the validation message for a single reactive-forms control.
  *
- * Drop it next to any control — it works out when to show itself, so no reveal
- * wiring is repeated per field:
+ * Field components pass the message they have already resolved:
  * ```html
- * <app-form-validation-error [control]="form.controls.title" [messages]="titleErrorMessages" />
+ * <app-form-validation-error [fieldId]="errorId()" [message]="message()" />
+ * ```
+ *
+ * Dropped next to a raw control it works the reveal out for itself, so no
+ * per-field wiring is repeated:
+ * ```html
+ * <app-form-validation-error label="Title" [control]="form.controls.title" />
  * ```
  */
 @Component({
   selector: 'app-form-validation-error',
-  template: `
-    <span class="form-validation-error__text">{{ message() }}</span>
-  `,
+  template: ` <span class="form-validation-error__text">{{ displayedMessage() }}</span> `,
   styleUrl: './form-validation-error.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    '[class.form-validation-error--visible]': '!!message()',
+    '[class.form-validation-error--visible]': '!!displayedMessage()',
     '[attr.id]': 'fieldId()',
     'aria-live': 'polite',
   },
 })
 export class FormValidationError {
-  private readonly formGroupDirective = inject(FormGroupDirective, { optional: true });
+  /** A message resolved elsewhere. Set by field components; wins over `control`. */
+  readonly message = input<string | null>(null);
 
-  readonly control = input.required<AbstractControl>();
+  /** The control to watch when no `message` is supplied. */
+  readonly control = input<AbstractControl | null>(null);
 
-  /** Maps an error key (`required`, `maxlength`, …) to the message to show. */
-  readonly messages = input.required<Record<string, string>>();
+  /** The field's visible label, interpolated into the default messages. */
+  readonly label = input('');
+
+  /** Wording overrides for this field, layered over the app-wide registry. */
+  readonly messages = input<ValidationMessages | undefined>(undefined);
 
   /** Set so the field can point `aria-describedby` at this message. */
   readonly fieldId = input<string | null>(null);
 
-  /**
-   * Bridges form state into the signal graph.
-   *
-   * Reactive Forms report through Observables, so under zoneless nothing would
-   * repaint without this. `control` is an input signal, hence toObservable +
-   * switchMap rather than reading it once.
-   *
-   * Merging the *root's* events is load-bearing: `FormGroupDirective.onSubmit`
-   * emits `FormSubmittedEvent` on the root form, never on the child control, and
-   * the public `submitted` getter is `untracked` by design — so without this a
-   * submitted-but-untouched field would stay silent.
-   */
-  private readonly controlEvents = toSignal(
-    toObservable(this.control).pipe(
-      switchMap((control) => merge(control.events, control.root.events)),
-    ),
-    { initialValue: null },
-  );
-
-  readonly message = computed(() => {
-    // Establishes the dependency that re-runs this on any form change.
-    this.controlEvents();
-
-    const control = this.control();
-
-    if (!isErrorVisible(control, this.formGroupDirective?.submitted ?? false)) {
-      return null;
-    }
-
-    const messages = this.messages();
-    const errorKey = Object.keys(control.errors ?? {}).find((key) => key in messages);
-
-    return errorKey ? messages[errorKey] : null;
+  private readonly ownState = createControlErrorState({
+    control: this.control,
+    label: this.label,
+    messages: this.messages,
   });
+
+  protected readonly displayedMessage = computed(() => this.message() ?? this.ownState.message());
 }

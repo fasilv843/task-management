@@ -9,7 +9,7 @@ import { RichTextControl } from './rich-text-editor.types';
   imports: [ReactiveFormsModule, RichTextEditor],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <app-rich-text-editor [formControl]="description" [controls]="controls" />
+    <app-rich-text-editor label="Description" [formControl]="description" [controls]="controls" />
   `,
 })
 class HostComponent {

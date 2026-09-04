@@ -1,7 +1,7 @@
 import { FormControl } from '@angular/forms';
 
 import { DateService } from '../../services/date-service';
-import { nonBlank, notInPast, richTextRequired } from './task-form.validators';
+import { notInPast, richTextRequired } from './task-form.validators';
 
 describe('task form validators', () => {
   const dateService = new DateService();
@@ -15,16 +15,6 @@ describe('task form validators', () => {
 
     return `${future.getFullYear()}-${month}-${day}`;
   }
-
-  describe('nonBlank', () => {
-    it('rejects whitespace-only text', () => {
-      expect(nonBlank(new FormControl('   '))).toEqual({ nonBlank: true });
-    });
-
-    it('accepts real text', () => {
-      expect(nonBlank(new FormControl('Write the form'))).toBeNull();
-    });
-  });
 
   describe('notInPast', () => {
     const validator = notInPast(dateService);

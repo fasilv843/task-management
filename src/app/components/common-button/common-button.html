@@ -1,8 +1,11 @@
 <button
+  #button
   [type]="type()"
   [disabled]="disabled()"
   [attr.aria-label]="ariaLabel() ?? null"
-  [class]="classes"
+  [attr.aria-expanded]="ariaExpanded() ?? null"
+  [attr.aria-controls]="ariaControls() ?? null"
+  [class]="classes()"
   (click)="onClick($event)"
 >
   <ng-content select="[icon]" />

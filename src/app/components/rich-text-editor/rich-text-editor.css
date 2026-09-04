@@ -80,7 +80,7 @@ quill-editor {
   fill: var(--color-accent-ink);
 }
 
-:host(.rich-text-editor--invalid) ::ng-deep .ql-toolbar.ql-snow,
-:host(.rich-text-editor--invalid) ::ng-deep .ql-container.ql-snow {
+:host(.field--invalid) ::ng-deep .ql-toolbar.ql-snow,
+:host(.field--invalid) ::ng-deep .ql-container.ql-snow {
   border-color: var(--color-status-overdue-ink);
 }

@@ -1,3 +1,5 @@
+import { TaskComment } from './comment.types';
+
 export enum TaskStatus {
   PENDING = 'PENDING',
   IN_PROGRESS = 'IN_PROGRESS',
@@ -24,3 +26,17 @@ export interface TaskListItem extends Task {
 
 /** Payload used to create or update a task. The id is assigned by the store. */
 export type TaskDraft = Omit<Task, 'id'>;
+
+/**
+ * Options for the task reads, standing in for a query string: asking for
+ * `{ comments: true }` is the `?comments=true` of this fake API, and returns the
+ * task with its thread already attached rather than requiring a second call.
+ */
+export interface TaskQueryOptions {
+  comments?: boolean;
+}
+
+/** What a task read returns when comments were requested. */
+export interface TaskWithComments extends Task {
+  comments: TaskComment[];
+}

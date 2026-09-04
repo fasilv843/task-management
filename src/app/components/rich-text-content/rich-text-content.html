@@ -13,15 +13,14 @@
   </div>
 
   @if (isOverflowing()) {
-    <button
-      type="button"
-      class="mt-1.5 cursor-pointer text-sm text-ink underline-offset-2 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-      [attr.aria-expanded]="isExpanded()"
-      [attr.aria-controls]="contentId"
-      [attr.aria-label]="toggleAccessibleName()"
-      (click)="toggle()"
-    >
-      {{ toggleLabel() }}
-    </button>
+    <app-common-button
+      class="mt-1.5 text-sm"
+      variant="link"
+      [label]="toggleLabel()"
+      [ariaLabel]="toggleAccessibleName()"
+      [ariaExpanded]="isExpanded()"
+      [ariaControls]="contentId"
+      (buttonClick)="toggle()"
+    />
   }
 }

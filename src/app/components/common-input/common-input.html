@@ -1,0 +1,40 @@
+<app-form-field
+  [label]="label()"
+  [labelFor]="fieldId()"
+  [labelHidden]="labelHidden()"
+  [hint]="hint()"
+  [hintId]="hintId()"
+  [errorId]="errorId()"
+  [message]="message()"
+>
+  @if (isTextarea()) {
+    <textarea
+      #control
+      [id]="fieldId()"
+      [rows]="rows()"
+      [value]="value() ?? ''"
+      [disabled]="isDisabled()"
+      [placeholder]="placeholder()"
+      [class]="controlClass()"
+      [attr.aria-invalid]="hasError() ? 'true' : null"
+      [attr.aria-describedby]="describedBy()"
+      (input)="onInput($event)"
+      (blur)="onTouched()"
+    ></textarea>
+  } @else {
+    <input
+      #control
+      [id]="fieldId()"
+      [type]="type()"
+      [value]="value() ?? ''"
+      [disabled]="isDisabled()"
+      [placeholder]="placeholder()"
+      [class]="controlClass()"
+      [attr.autocomplete]="autocomplete()"
+      [attr.aria-invalid]="hasError() ? 'true' : null"
+      [attr.aria-describedby]="describedBy()"
+      (input)="onInput($event)"
+      (blur)="onTouched()"
+    />
+  }
+</app-form-field>

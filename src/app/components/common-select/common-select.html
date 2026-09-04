@@ -1,0 +1,39 @@
+<app-form-field
+  [label]="label()"
+  [labelFor]="fieldId()"
+  [labelHidden]="labelHidden()"
+  [hint]="hint()"
+  [hintId]="hintId()"
+  [errorId]="errorId()"
+  [message]="message()"
+>
+  <select
+    #control
+    [id]="fieldId()"
+    [disabled]="isDisabled()"
+    class="common-select__control"
+    [attr.aria-invalid]="hasError() ? 'true' : null"
+    [attr.aria-describedby]="describedBy()"
+    (change)="onSelect($event)"
+    (blur)="onTouched()"
+  >
+    @if (placeholder(); as placeholderLabel) {
+      <option value="" [selected]="!value()">{{ placeholderLabel }}</option>
+    }
+
+    <!--
+      Selection is driven by [selected] on the options rather than [value] on the
+      select: the options live in an embedded view, so on the first pass they do
+      not exist yet when the select's own bindings are applied.
+    -->
+    @for (option of options(); track option.value) {
+      <option
+        [value]="option.value"
+        [selected]="option.value === value()"
+        [disabled]="!!option.disabled"
+      >
+        {{ option.label }}
+      </option>
+    }
+  </select>
+</app-form-field>

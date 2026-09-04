@@ -3,13 +3,7 @@
     <div class="flex flex-wrap items-center justify-between gap-4">
       <h1 class="text-[28px] font-semibold leading-tight text-ink">Tasks</h1>
 
-      <button
-        type="button"
-        class="shrink-0 cursor-pointer border border-ink bg-ink px-4 py-2 text-sm font-medium text-paper transition-colors hover:bg-paper hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-        (click)="addTask()"
-      >
-        New task
-      </button>
+      <app-common-button class="shrink-0" label="New task" (buttonClick)="addTask()" />
     </div>
 
     <dl class="mt-6 flex flex-wrap gap-8" aria-label="Task summary">
@@ -56,13 +50,12 @@
     >
       <p class="font-medium text-ink">Couldn't load your tasks.</p>
       <p class="mt-1 text-sm text-ink-soft">Check your connection and try again.</p>
-      <button
-        type="button"
-        class="mt-4 cursor-pointer border border-ink px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-ink hover:text-paper focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-        (click)="tasksResource.reload()"
-      >
-        Retry
-      </button>
+      <app-common-button
+        class="mt-4"
+        variant="outline"
+        label="Retry"
+        (buttonClick)="tasksResource.reload()"
+      />
     </div>
   } @else if (taskItems().length) {
     <ul class="border-b border-rule">
@@ -110,30 +103,25 @@
           </div>
 
           <div class="flex shrink-0 items-start gap-3 pl-2 text-sm">
-            <button
-              type="button"
-              class="cursor-pointer text-ink underline-offset-2 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-              [attr.aria-label]="'View ' + task.title"
-              (click)="viewTask(task)"
-            >
-              View
-            </button>
-            <button
-              type="button"
-              class="cursor-pointer text-ink underline-offset-2 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-              [attr.aria-label]="'Edit ' + task.title"
-              (click)="editTask(task)"
-            >
-              Edit
-            </button>
-            <button
-              type="button"
-              class="cursor-pointer text-status-overdue-ink underline-offset-2 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-              [attr.aria-label]="'Delete ' + task.title"
-              (click)="deleteTask(task)"
-            >
-              Delete
-            </button>
+            <app-common-button
+              variant="link"
+              label="View"
+              [ariaLabel]="'View ' + task.title"
+              (buttonClick)="viewTask(task)"
+            />
+            <app-common-button
+              variant="link"
+              label="Edit"
+              [ariaLabel]="'Edit ' + task.title"
+              (buttonClick)="editTask(task)"
+            />
+            <app-common-button
+              variant="link"
+              tone="danger"
+              label="Delete"
+              [ariaLabel]="'Delete ' + task.title"
+              (buttonClick)="deleteTask(task)"
+            />
           </div>
         </li>
       }
@@ -141,13 +129,7 @@
   } @else {
     <div class="border border-dashed border-rule px-6 py-14 text-center">
       <p class="text-ink-soft">No tasks yet.</p>
-      <button
-        type="button"
-        class="mt-4 cursor-pointer border border-ink bg-ink px-4 py-2 text-sm font-medium text-paper transition-colors hover:bg-paper hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-        (click)="addTask()"
-      >
-        Add your first task
-      </button>
+      <app-common-button class="mt-4" label="Add your first task" (buttonClick)="addTask()" />
     </div>
   }
 </div>

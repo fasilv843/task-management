@@ -13,4 +13,9 @@ export class DateService {
     const [year, month, day] = value.split('-').map(Number);
     return new Date(year, month - 1, day);
   }
+
+  /** Current time as an ISO 8601 string, for stamping records on creation. */
+  nowIso(): string {
+    return new Date().toISOString();
+  }
 }

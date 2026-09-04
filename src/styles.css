@@ -36,3 +36,14 @@ body {
   color: var(--color-ink);
   font-family: var(--font-sans);
 }
+
+/*
+ * Set by InvalidFieldDirective once a control's error is due to be shown.
+ *
+ * Global because the directive can sit on any raw control, anywhere. The field
+ * components carry a matching :host(.field--invalid) rule of their own, since
+ * their host element is a wrapper rather than the control itself.
+ */
+.field--invalid {
+  border-color: var(--color-status-overdue-ink);
+}

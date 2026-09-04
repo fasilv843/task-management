@@ -1,0 +1,40 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" appFocusFirstInvalid novalidate>
+  <app-common-input
+    [label]="fieldLabel()"
+    [labelHidden]="true"
+    [type]="InputType.TEXTAREA"
+    [rows]="3"
+    [placeholder]="placeholder()"
+    [errorMessages]="errorMessages"
+    formControlName="text"
+  />
+
+  @if (errorMessage()) {
+    <p
+      class="mt-2 border border-status-overdue-ink bg-status-overdue-bg px-3 py-2 text-sm text-ink"
+      role="alert"
+    >
+      {{ errorMessage() }}
+    </p>
+  }
+
+  <div class="mt-3 flex flex-wrap items-center gap-3">
+    <button
+      type="submit"
+      class="cursor-pointer border border-ink bg-ink px-4 py-2 text-sm font-medium text-paper transition-colors hover:bg-paper hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:cursor-not-allowed disabled:opacity-60"
+      [disabled]="isSaving()"
+    >
+      {{ isSaving() ? 'Saving…' : submitLabel() }}
+    </button>
+
+    @if (showCancel()) {
+      <button
+        type="button"
+        class="cursor-pointer border border-rule px-4 py-2 text-sm font-medium text-ink transition-colors hover:border-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+        (click)="cancelled.emit()"
+      >
+        Cancel
+      </button>
+    }
+  </div>
+</form>

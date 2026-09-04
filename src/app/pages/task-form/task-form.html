@@ -47,92 +47,38 @@
       </button>
     </div>
   } @else {
-    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
-      <!-- Title -->
-      <div class="mb-8">
-        <label for="task-title" class="block text-sm font-medium text-ink">Title</label>
-        <input
-          id="task-title"
-          type="text"
-          formControlName="title"
-          autocomplete="off"
-          class="mt-2 block w-full border bg-surface px-3 py-2 text-ink transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-          [class.border-rule]="!titleHasError()"
-          [class.border-status-overdue-ink]="titleHasError()"
-          [attr.aria-invalid]="titleHasError() ? 'true' : null"
-          [attr.aria-describedby]="titleHasError() ? 'task-title-error' : null"
-        />
-        <app-form-validation-error
-          fieldId="task-title-error"
-          [control]="form.controls.title"
-          [messages]="titleErrorMessages"
-        />
-      </div>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" appFocusFirstInvalid novalidate>
+      <app-common-input
+        class="mb-8"
+        fieldId="task-title"
+        label="Title"
+        formControlName="title"
+        autocomplete="off"
+      />
 
-      <!-- Description -->
-      <div class="mb-8">
-        <span id="task-description-label" class="block text-sm font-medium text-ink">
-          Description
-        </span>
+      <app-rich-text-editor
+        class="mb-8"
+        fieldId="task-description"
+        label="Description"
+        formControlName="description"
+        placeholder="Describe the task…"
+      />
 
-        <app-rich-text-editor
-          class="mt-2"
-          formControlName="description"
-          placeholder="Describe the task…"
-          labelledBy="task-description-label"
-          describedBy="task-description-error"
-          [invalid]="descriptionHasError()"
-        />
+      <app-common-input
+        class="mb-8"
+        fieldId="task-deadline"
+        label="Deadline"
+        [type]="InputType.DATE"
+        formControlName="deadline"
+      />
 
-        <app-form-validation-error
-          fieldId="task-description-error"
-          [control]="form.controls.description"
-          [messages]="descriptionErrorMessages"
-        />
-      </div>
-
-      <!-- Deadline -->
-      <div class="mb-8">
-        <label for="task-deadline" class="block text-sm font-medium text-ink">Deadline</label>
-        <input
-          id="task-deadline"
-          type="date"
-          formControlName="deadline"
-          class="mt-2 block w-full border bg-surface px-3 py-2 font-mono text-ink transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-          [class.border-rule]="!deadlineHasError()"
-          [class.border-status-overdue-ink]="deadlineHasError()"
-          [attr.aria-invalid]="deadlineHasError() ? 'true' : null"
-          [attr.aria-describedby]="deadlineHasError() ? 'task-deadline-error' : null"
-        />
-        <app-form-validation-error
-          fieldId="task-deadline-error"
-          [control]="form.controls.deadline"
-          [messages]="deadlineErrorMessages"
-        />
-      </div>
-
-      <!-- Status -->
-      <div class="mb-8">
-        <label for="task-status" class="block text-sm font-medium text-ink">Status</label>
-        <select
-          id="task-status"
-          formControlName="status"
-          class="mt-2 block w-full border bg-surface px-3 py-2 text-ink transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-          [class.border-rule]="!statusHasError()"
-          [class.border-status-overdue-ink]="statusHasError()"
-          [attr.aria-invalid]="statusHasError() ? 'true' : null"
-          [attr.aria-describedby]="statusHasError() ? 'task-status-error' : null"
-        >
-          @for (option of statusOptions; track option.value) {
-            <option [value]="option.value">{{ option.label }}</option>
-          }
-        </select>
-        <app-form-validation-error
-          fieldId="task-status-error"
-          [control]="form.controls.status"
-          [messages]="statusErrorMessages"
-        />
-      </div>
+      <app-common-select
+        class="mb-8"
+        fieldId="task-status"
+        label="Status"
+        [options]="statusOptions"
+        formControlName="status"
+      />
 
       @if (saveError()) {
         <div

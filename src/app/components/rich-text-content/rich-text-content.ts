@@ -11,6 +11,7 @@ import {
   viewChild,
 } from '@angular/core';
 
+import { CommonButton } from '../common-button/common-button';
 import { normalizeRichTextHtml } from './rich-text-content.utils';
 
 let uniqueId = 0;
@@ -31,6 +32,7 @@ let uniqueId = 0;
  */
 @Component({
   selector: 'app-rich-text-content',
+  imports: [CommonButton],
   templateUrl: './rich-text-content.html',
   styleUrl: './rich-text-content.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

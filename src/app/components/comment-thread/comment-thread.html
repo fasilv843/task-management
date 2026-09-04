@@ -1,0 +1,56 @@
+<article>
+  <p class="font-mono text-xs text-ink-soft">
+    <time [attr.datetime]="node().createdAt">
+      {{ node().createdAt | date: 'MMM d, y · h:mm a' }}
+    </time>
+  </p>
+
+  <p class="mt-1.5 text-sm leading-relaxed break-words whitespace-pre-wrap text-ink">
+    {{ node().text }}
+  </p>
+
+  <app-common-button
+    #replyButton
+    class="mt-2 text-sm"
+    variant="link"
+    label="Reply"
+    [ariaLabel]="replyLabel()"
+    [ariaExpanded]="isReplying()"
+    (buttonClick)="replyRequested.emit(node().id)"
+  />
+
+  @if (isReplying()) {
+    <app-comment-form
+      class="mt-3 block"
+      fieldLabel="Write a reply"
+      submitLabel="Reply"
+      placeholder="Write a reply…"
+      [autoFocus]="true"
+      [showCancel]="true"
+      [isSaving]="isSaving()"
+      [errorMessage]="replyError()"
+      (submitted)="onReplySubmitted($event)"
+      (cancelled)="replyCancelled.emit()"
+    />
+  }
+
+  @if (node().replies.length) {
+    <!-- A real nested list: screen readers announce the nesting level, so depth
+         is conveyed by structure and the indent is only its visual echo. -->
+    <ul class="mt-4 space-y-4 border-l border-rule" [class]="indentClass()">
+      @for (reply of node().replies; track reply.id) {
+        <li>
+          <app-comment-thread
+            [node]="reply"
+            [activeReplyId]="activeReplyId()"
+            [isSaving]="isSaving()"
+            [replyError]="replyError()"
+            (replyRequested)="replyRequested.emit($event)"
+            (replyCancelled)="replyCancelled.emit()"
+            (replySubmitted)="replySubmitted.emit($event)"
+          />
+        </li>
+      }
+    </ul>
+  }
+</article>

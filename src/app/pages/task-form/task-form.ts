@@ -7,69 +7,54 @@ import {
   inject,
   signal,
   untracked,
-  viewChild,
 } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
-import { AbstractControl, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Location } from '@angular/common';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { rxResource, takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 
+import { CommonInput } from '../../components/common-input/common-input';
+import { InputType } from '../../components/common-input/common-input.types';
+import { CommonSelect } from '../../components/common-select/common-select';
 import { RichTextEditor } from '../../components/rich-text-editor/rich-text-editor';
-import { FormValidationError } from '../../components/form-validation-error/form-validation-error';
-import { isErrorVisible } from '../../components/form-validation-error/form-validation-error.utils';
-import { TaskService } from '../../services/task-service';
+import { FocusFirstInvalidDirective } from '../../shared/directives/focus-first-invalid.directive';
+import { TaskStore } from '../../services/task-store';
 import { DateService } from '../../services/date-service';
 import { TASK_STATUS_LABELS, TaskDraft, TaskStatus } from '../../services/task.types';
-import { TaskFormMode, TaskFormValue, TaskStatusOption } from './task-form.types';
-import { nonBlank, notInPast, richTextRequired } from './task-form.validators';
+import { nonBlank } from '../../shared/form.validators';
+import { TaskFormMode, TaskStatusOption } from './task-form.types';
+import { notInPast, richTextRequired } from './task-form.validators';
 
 @Component({
   selector: 'app-task-form',
-  imports: [ReactiveFormsModule, RichTextEditor, FormValidationError],
+  imports: [
+    ReactiveFormsModule,
+    CommonInput,
+    CommonSelect,
+    RichTextEditor,
+    FocusFirstInvalidDirective,
+  ],
   templateUrl: './task-form.html',
   styleUrl: './task-form.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TaskForm {
-  private readonly taskService = inject(TaskService);
+  private readonly taskStore = inject(TaskStore);
   private readonly dateService = inject(DateService);
   private readonly formBuilder = inject(FormBuilder);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly document = inject(DOCUMENT);
+  private readonly location = inject(Location);
 
   readonly TaskFormMode = TaskFormMode;
+  readonly InputType = InputType;
 
   readonly statusOptions: TaskStatusOption[] = Object.values(TaskStatus).map((value) => ({
     value,
     label: TASK_STATUS_LABELS[value],
   }));
-
-  // Held as fields rather than inline template literals so their identities stay
-  // stable across change detection.
-  readonly titleErrorMessages: Record<string, string> = {
-    required: 'Title is required.',
-    nonBlank: 'Title is required.',
-    maxlength: 'Title must be 100 characters or fewer.',
-  };
-
-  readonly descriptionErrorMessages: Record<string, string> = {
-    required: 'Description is required.',
-  };
-
-  readonly deadlineErrorMessages: Record<string, string> = {
-    required: 'Deadline is required.',
-    invalidDate: 'Enter a valid date.',
-    notInPast: 'Deadline cannot be in the past.',
-  };
-
-  readonly statusErrorMessages: Record<string, string> = {
-    required: 'Status is required.',
-  };
-
-  private readonly descriptionEditor = viewChild(RichTextEditor);
 
   private readonly routeId = toSignal(this.route.paramMap.pipe(map((params) => params.get('id'))), {
     initialValue: null,
@@ -97,7 +82,7 @@ export class TaskForm {
   readonly taskResource = rxResource({
     // Undefined params keep the resource idle, so create mode never fetches.
     params: () => this.taskId() ?? undefined,
-    stream: ({ params }) => this.taskService.getTaskById(params),
+    stream: ({ params }) => this.taskStore.getTaskById(params),
   });
 
   /** The deadline the task was loaded with, so editing an already-overdue task stays possible. */
@@ -112,21 +97,15 @@ export class TaskForm {
     status: [TaskStatus.PENDING, [Validators.required]],
   });
 
-  /**
-   * Bridges form state into the signal graph so the invalid input styling tracks
-   * it under zoneless. `FormValidationError` keeps its own bridge for messages.
-   */
-  private readonly formEvents = toSignal(this.form.events, { initialValue: null });
-
-  private readonly wasSubmitted = signal(false);
-
   readonly isSaving = signal(false);
 
   readonly saveError = signal<string | null>(null);
 
   readonly isLoadingTask = computed(() => this.isUpdateMode() && this.taskResource.isLoading());
 
-  readonly loadError = computed(() => (this.isUpdateMode() ? this.taskResource.error() : undefined));
+  readonly loadError = computed(() =>
+    this.isUpdateMode() ? this.taskResource.error() : undefined,
+  );
 
   readonly isTaskMissing = computed(
     () =>
@@ -147,14 +126,6 @@ export class TaskForm {
   readonly submitLabel = computed(() =>
     this.mode() === TaskFormMode.CREATE ? 'Create task' : 'Save changes',
   );
-
-  readonly titleHasError = computed(() => this.showsError(this.form.controls.title));
-
-  readonly descriptionHasError = computed(() => this.showsError(this.form.controls.description));
-
-  readonly deadlineHasError = computed(() => this.showsError(this.form.controls.deadline));
-
-  readonly statusHasError = computed(() => this.showsError(this.form.controls.status));
 
   constructor() {
     // Fill the form once the task arrives in update mode. Guarded so a resource
@@ -183,11 +154,11 @@ export class TaskForm {
   }
 
   onSubmit(): void {
-    this.wasSubmitted.set(true);
-
     if (this.form.invalid) {
+      // `appFocusFirstInvalid` also does this and moves focus, but only for a
+      // real submit event — keeping it here means a programmatic call still
+      // reveals the messages.
       this.form.markAllAsTouched();
-      this.focusFirstInvalidControl();
       return;
     }
 
@@ -203,8 +174,8 @@ export class TaskForm {
 
     const save =
       this.isUpdateMode() && taskId !== null
-        ? this.taskService.updateTask(taskId, draft)
-        : this.taskService.createTask(draft);
+        ? this.taskStore.updateTask(taskId, draft)
+        : this.taskStore.createTask(draft);
 
     // Subscribing is deliberate here: this is a command, not view state. Every
     // result lands in a signal, which is what keeps zoneless rendering correct.
@@ -223,37 +194,10 @@ export class TaskForm {
   }
 
   onCancel(): void {
-    this.router.navigate(['/tasks']);
-  }
-
-  /** Drives the invalid input styling, following the same rule as the messages. */
-  private showsError(control: AbstractControl): boolean {
-    // Establishes the dependency that re-runs this computed on any form change.
-    this.formEvents();
-
-    return isErrorVisible(control, this.wasSubmitted());
-  }
-
-  private focusFirstInvalidControl(): void {
-    const fieldOrder: [keyof TaskFormValue, string][] = [
-      ['title', 'task-title'],
-      ['description', 'task-description'],
-      ['deadline', 'task-deadline'],
-      ['status', 'task-status'],
-    ];
-
-    for (const [controlName, elementId] of fieldOrder) {
-      if (!this.form.controls[controlName].invalid) {
-        continue;
-      }
-
-      if (controlName === 'description') {
-        this.descriptionEditor()?.focus();
-      } else {
-        this.document.getElementById(elementId)?.focus();
-      }
-
-      return;
+    if (history.length > 1) {
+      this.location.back();
+    } else {
+      this.router.navigate(['/tasks']);
     }
   }
 }
