@@ -13,9 +13,6 @@ npm install
 # Start the dev server (http://localhost:4200/)
 npm start
 
-# Run unit tests (Vitest)
-npm test
-
 # Production build (outputs to dist/)
 npm run build
 ```
@@ -27,13 +24,11 @@ Angular **21.2** (`@angular/core ^21.2.0`, Angular CLI `^21.2.23`), running **zo
 ## Packages Used
 
 **Runtime**
-- `@angular/core`, `@angular/common`, `@angular/compiler`, `@angular/platform-browser`, `@angular/forms`, `@angular/router` — core framework, reactive forms, and the router
 - `@fullcalendar/angular`, `@fullcalendar/core`, `@fullcalendar/daygrid` — the calendar view of the task list
 - `ngx-quill`, `quill` — rich text editing for task descriptions and comments
 - `rxjs` — Observable streams from services, consumed via `rxResource`
 
 **Development / tooling**
-- `@angular/cli`, `@angular/build`, `@angular/compiler-cli` — build tooling
 - `tailwindcss`, `@tailwindcss/postcss`, `postcss` — styling
 - `vitest`, `jsdom` — unit test runner and DOM environment
 - `prettier` — code formatting
