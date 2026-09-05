@@ -26,7 +26,9 @@ import { CommonButton } from '../common-button/common-button';
       role="alert"
     >
       <p class="font-medium text-ink">{{ message() }}</p>
-      <p class="mt-1 text-sm text-ink-soft">{{ hint() }}</p>
+      @if (hint(); as hint) {
+        <p class="mt-1 text-sm text-ink-soft">{{ hint }}</p>
+      }
       <app-common-button
         class="mt-4"
         variant="outline"
@@ -38,7 +40,7 @@ import { CommonButton } from '../common-button/common-button';
 })
 export class ErrorState {
   readonly message = input.required<string>();
-  readonly hint = input('Check your connection and try again.');
+  readonly hint = input<string | undefined>(undefined);
   readonly retryLabel = input('Retry');
 
   readonly retry = output<void>();
