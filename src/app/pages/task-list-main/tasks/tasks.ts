@@ -8,6 +8,7 @@ import { CommonStatus } from '../../../components/common-status/common-status';
 import { CommonTab } from '../../../components/common-tab/common-tab';
 import { ErrorState } from '../../../components/error-state/error-state';
 import { RichTextContent } from '../../../components/rich-text-content/rich-text-content';
+import { TabOption } from '../../../components/common-tab/common-tab.types';
 import { TaskStore } from '../../../services/task-store';
 import { isBeforeToday } from '../../../utils/date.utils';
 import {
@@ -17,7 +18,11 @@ import {
   TaskListItem,
   TaskStatus,
 } from '../../../services/task.types';
-import { TASK_VIEW_TABS } from '../../../shared/task-view-tabs';
+
+const TASK_VIEW_TABS: readonly TabOption[] = [
+  { id: 'list', label: 'List' },
+  { id: 'calendar', label: 'Calendar' },
+];
 
 @Component({
   selector: 'app-tasks',
