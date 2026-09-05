@@ -19,6 +19,7 @@ import {
   earliestSelectable,
 } from '../../components/common-date-input/common-date-input';
 import { CommonBackButton } from '../../components/common-back-button/common-back-button';
+import { CommonButton } from '../../components/common-button/common-button';
 import { CommonInput } from '../../components/common-input/common-input';
 import { CommonSelect } from '../../components/common-select/common-select';
 import { ErrorState } from '../../components/error-state/error-state';
@@ -35,6 +36,7 @@ import { richTextRequired } from './task-form.validators';
   imports: [
     ReactiveFormsModule,
     CommonBackButton,
+    CommonButton,
     CommonDateInput,
     CommonInput,
     CommonSelect,
@@ -121,6 +123,10 @@ export class TaskForm {
 
   readonly submitLabel = computed(() =>
     this.mode() === 'create' ? 'Create' : 'Update',
+  );
+
+  readonly submitButtonLabel = computed(() =>
+    this.isSaving() ? 'Saving…' : this.submitLabel(),
   );
 
   constructor() {
