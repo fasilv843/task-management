@@ -1,0 +1,27 @@
+/* Points at the project stylesheet, not bare 'tailwindcss', so `@apply` can
+   resolve the @theme tokens declared there (ink, ink-soft, rule, accent).
+   It emits no CSS of its own. */
+@reference '../../../styles.css';
+
+/* Navigation tabs — deliberately nothing like a button. The current tab is
+   marked twice over: full-ink text (not just the underline, so the state does
+   not rest on a single 2px rule) and `aria-current="page"` from the router. */
+
+.tabs {
+  @apply m-0 flex list-none gap-6 p-0;
+}
+
+.tab {
+  /* Symmetric py keeps the label centred against the sibling button in the
+     header row; the transparent bottom border reserves the underline's space
+     so nothing shifts when a tab becomes active. */
+  @apply inline-block border-b-2 border-transparent py-1 text-sm font-medium
+    text-ink-soft no-underline transition-colors duration-150
+    hover:border-rule hover:text-ink
+    focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2
+    focus-visible:outline-accent;
+}
+
+.tab--active {
+  @apply border-ink text-ink;
+}

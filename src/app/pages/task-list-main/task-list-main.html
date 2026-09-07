@@ -8,9 +8,7 @@
       <div class="flex flex-wrap items-center gap-4">
         <app-common-tab
           [tabs]="viewTabs"
-          [active]="activeView()"
           ariaLabel="Task views"
-          (tabSelect)="switchView($event)"
         />
 
         <app-common-button
