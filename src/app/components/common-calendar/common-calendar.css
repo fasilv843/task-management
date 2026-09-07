@@ -11,7 +11,11 @@
   --fc-border-color: var(--color-rule);
   --fc-neutral-bg-color: var(--color-paper);
   --fc-neutral-text-color: var(--color-ink-soft);
-  --fc-today-bg-color: var(--color-info-bg);
+  /* The accent tint, which is neither the state palette an event's fill is
+     drawn from (so today can't read as a status) nor the neutral grey the
+     out-of-range cells and the agenda's hover already use (so it still stands
+     out as the current day). */
+  --fc-today-bg-color: var(--color-accent-bg);
 
   /* Fallback for an event that carries no colours of its own, which would
      otherwise come out in FullCalendar's stock blue. The agenda draws its dot
