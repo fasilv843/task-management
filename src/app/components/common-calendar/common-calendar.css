@@ -3,9 +3,9 @@
 /* FullCalendar renders outside Angular's style encapsulation, so it cannot be
    styled with ordinary component selectors. Custom properties *do* inherit into
    it, and FullCalendar exposes its whole surface through --fc-* variables, so
-   fitting it to the paper/ink palette is a matter of redeclaring them here.
-   (The one rule that needs a real selector — the focus ring on an event — lives
-   in src/styles.css alongside .field--invalid, for the same reason.) */
+   fitting it to the paper/ink palette is mostly a matter of redeclaring them
+   here. The two things a variable cannot express need real selectors, which is
+   what the ::ng-deep rules at the bottom are for. */
 :host {
   --fc-page-bg-color: var(--color-surface);
   --fc-border-color: var(--color-rule);
@@ -24,4 +24,40 @@
   --fc-small-font-size: 0.8125rem;
 
   @apply font-sans text-ink;
+}
+
+/*
+ * Focus ring for calendar events.
+ *
+ * FullCalendar builds its own DOM inside <app-common-calendar> and those
+ * elements never carry this component's encapsulation attribute, so a plain
+ * component selector cannot reach them. `:host ::ng-deep` is the supported way
+ * through: it compiles to `[_nghost-x] .fc …`, which still pierces into
+ * FullCalendar's markup but only inside this component's host element, so it
+ * cannot collide with an unrelated package that happens to use an `.fc` class.
+ */
+:host ::ng-deep .fc .fc-event:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/*
+ * Readable label on the filled prev/next/today buttons.
+ *
+ * FullCalendar has --fc-button-hover-bg-color and --fc-button-active-bg-color
+ * but no matching text-color variables — every button state reuses
+ * --fc-button-text-color. Since the hover and active fill above is the same ink
+ * color the label is painted in, the label would otherwise disappear into the
+ * fill. The host attribute already outranks FullCalendar's own rule regardless
+ * of which stylesheet the browser sees last.
+ *
+ * The :not(:disabled) guard matters as much as the rule itself: a disabled
+ * button — `today` while the current month is already in view — keeps the
+ * transparent background, so lightening its label would hide it against the
+ * page instead.
+ */
+:host ::ng-deep .fc .fc-button-primary:not(:disabled):hover,
+:host ::ng-deep .fc .fc-button-primary:not(:disabled).fc-button-active,
+:host ::ng-deep .fc .fc-button-primary:not(:disabled):active {
+  color: var(--color-paper);
 }
