@@ -16,7 +16,10 @@
   }
 </ul>
 
-@if (tasksResource.isLoading()) {
+<!-- The skeleton stands in for the first load only. A reload keeps the calendar
+     on screen, because tearing it down would destroy and rebuild it — losing
+     the view the user picked and the month they had paged to. -->
+@if (tasksResource.isLoading() && !tasksResource.hasValue()) {
   <div aria-label="Loading calendar" aria-busy="true">
     <div class="skeleton-loader h-9 w-full bg-rule"></div>
     <div class="skeleton-loader mt-3 h-[30rem] w-full bg-rule"></div>
@@ -29,6 +32,7 @@
 } @else {
   <app-common-calendar
     [events]="calendarEvents()"
+    [attr.aria-busy]="tasksResource.isLoading()"
     (eventSelect)="openTask($event)"
   />
 }

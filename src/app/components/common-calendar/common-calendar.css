@@ -13,6 +13,16 @@
   --fc-neutral-text-color: var(--color-ink-soft);
   --fc-today-bg-color: var(--color-info-bg);
 
+  /* Fallback for an event that carries no colours of its own, which would
+     otherwise come out in FullCalendar's stock blue. The agenda draws its dot
+     from the border colour alone, so that one has to read on its own. */
+  --fc-event-bg-color: var(--color-info-bg);
+  --fc-event-border-color: var(--color-accent);
+  --fc-event-text-color: var(--color-accent-ink);
+
+  /* The agenda's row hover ships as a hardcoded off-palette grey. */
+  --fc-list-event-hover-bg-color: var(--color-paper);
+
   --fc-button-bg-color: transparent;
   --fc-button-border-color: var(--color-ink);
   --fc-button-text-color: var(--color-ink);
@@ -35,8 +45,14 @@
  * through: it compiles to `[_nghost-x] .fc …`, which still pierces into
  * FullCalendar's markup but only inside this component's host element, so it
  * cannot collide with an unrelated package that happens to use an `.fc` class.
+ *
+ * Both selectors are needed. In the grid views `.fc-event` is the focusable
+ * anchor itself; in the agenda it is the table row, which is never focused —
+ * the link inside it is. Without the second selector the agenda would have no
+ * visible focus indicator at all.
  */
-:host ::ng-deep .fc .fc-event:focus-visible {
+:host ::ng-deep .fc .fc-event:focus-visible,
+:host ::ng-deep .fc .fc-event a:focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
 }
