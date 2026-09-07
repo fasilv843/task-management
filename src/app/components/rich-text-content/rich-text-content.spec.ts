@@ -124,6 +124,25 @@ describe('RichTextContent', () => {
     expect(clipElement().classList).toContain('rich-text-content--clipped');
   });
 
+  it('keeps the toggle interaction from reaching a clickable ancestor', async () => {
+    await reportSize(240, 96);
+
+    const ancestor = fixture.nativeElement.parentElement as HTMLElement;
+    const clicks: Event[] = [];
+    const keydowns: Event[] = [];
+
+    ancestor.addEventListener('click', (event) => clicks.push(event));
+    ancestor.addEventListener('keydown', (event) => keydowns.push(event));
+
+    toggleButton()!.click();
+    toggleButton()!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    await fixture.whenStable();
+
+    expect(clicks).toEqual([]);
+    expect(keydowns).toEqual([]);
+    expect(toggleButton()!.textContent?.trim()).toBe('Show less');
+  });
+
   it('hides the toggle again when the content no longer overflows', async () => {
     await reportSize(240, 96);
     expect(toggleButton()).not.toBeNull();

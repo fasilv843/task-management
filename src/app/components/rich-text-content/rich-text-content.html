@@ -13,6 +13,12 @@
   </div>
 
   @if (isOverflowing()) {
+    <!--
+      Expanding is a local action, so the events stay here. Without this the
+      click — and the Enter/Space keydown that precedes it — bubbles to any
+      clickable ancestor (e.g. the task row in the list), which would navigate
+      away instead of revealing the rest of the text.
+    -->
     <app-common-button
       class="mt-1.5 text-sm"
       variant="link"
@@ -21,6 +27,8 @@
       [ariaExpanded]="isExpanded()"
       [ariaControls]="contentId"
       (buttonClick)="toggle()"
+      (click)="$event.stopPropagation()"
+      (keydown)="$event.stopPropagation()"
     />
   }
 }
