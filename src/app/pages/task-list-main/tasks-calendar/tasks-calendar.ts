@@ -1,19 +1,24 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { rxResource } from '@angular/core/rxjs-interop';
 
 import { CommonCalendar } from '../../../components/common-calendar/common-calendar';
-import { CalendarEvent } from '../../../components/common-calendar/common-calendar.types';
 import { ErrorState } from '../../../components/error-state/error-state';
+import { mobxToSignal } from '../../../state/mobx-to-signal';
 import { TaskStore } from '../../../services/task-store';
-import { TASK_STATUS_LABELS, Task, TaskStatus } from '../../../services/task.types';
-import { formatDateLabel } from '../../../utils/date.utils';
-import { TASK_STATUS_EVENT_COLORS } from './tasks-calendar.types';
+import {
+  TASK_STATUS_EVENT_COLORS,
+  TASK_STATUS_LABELS,
+  TaskStatus,
+} from '../../../services/task.types';
 
 /**
  * The calendar half of the task browser — same data as the list page, placed by
- * deadline. It owns the resource, the navigation, and the translation of a task
- * into a calendar event; drawing the month is CommonCalendar's job.
+ * deadline.
+ *
+ * Both halves read one store, so they can never show different tasks and
+ * switching tabs costs no second fetch. Turning a task into a calendar event is
+ * `TaskStore.calendarEvents`; drawing the month is `CommonCalendar`'s job. This
+ * component is the seam between them plus the navigation.
  */
 @Component({
   selector: 'app-tasks-calendar',
@@ -33,29 +38,27 @@ export class TasksCalendar {
     TaskStatus.COMPLETED,
   ].map((status) => ({ status, colors: TASK_STATUS_EVENT_COLORS[status] }));
 
-  readonly tasksResource = rxResource({
-    stream: () => this.taskStore.getTasks(),
-  });
+  protected readonly calendarEvents = mobxToSignal(() => this.taskStore.calendarEvents);
+  protected readonly isLoading = mobxToSignal(() => this.taskStore.isLoading);
+  protected readonly loadError = mobxToSignal(() => this.taskStore.loadError);
 
-  protected readonly calendarEvents = computed<CalendarEvent[]>(() =>
-    (this.tasksResource.value() ?? []).map((task) => this.toCalendarEvent(task)),
-  );
+  /**
+   * Latched, so a reload keeps the calendar on screen instead of dropping back
+   * to the skeleton — rebuilding it would lose the view and month the user had
+   * paged to.
+   */
+  protected readonly hasLoaded = mobxToSignal(() => this.taskStore.hasLoaded);
 
-  openTask(id: string): void {
-    this.router.navigate(['/tasks', id]);
+  constructor() {
+    // Idempotent: the list tab and this one share the single fetch.
+    void this.taskStore.loadTasks();
   }
 
-  private toCalendarEvent(task: Task): CalendarEvent {
-    return {
-      id: task.id,
-      title: task.title,
-      date: task.deadline,
-      // A real destination, so the event renders as an <a href> and stays
-      // reachable by keyboard and openable in a new tab.
-      url: `/tasks/${task.id}`,
-      colors: TASK_STATUS_EVENT_COLORS[task.status],
-      // Status reaches the label so colour is never the only carrier of it.
-      ariaLabel: `${task.title}, ${TASK_STATUS_LABELS[task.status]}, due ${formatDateLabel(task.deadline)}`,
-    };
+  protected retryLoad(): void {
+    void this.taskStore.reloadTasks();
+  }
+
+  openTask(id: string): void {
+    void this.router.navigate(['/tasks', id]);
   }
 }

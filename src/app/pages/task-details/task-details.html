@@ -86,7 +86,7 @@
         submitLabel="Comment"
         placeholder="Write a comment…"
         [isSaving]="isSavingComment()"
-        [errorMessage]="activeReplyId() === null ? commentError() : null"
+        [errorMessage]="topLevelCommentError()"
         (submitted)="addComment($event)"
       />
 
@@ -121,8 +121,8 @@
       <div class="skeleton-loader mt-8 h-4 w-32 bg-rule"></div>
       <div class="skeleton-loader mt-3 h-20 w-full bg-rule"></div>
     </div>
-  } @else if (loadError()) {
-    <app-error-state message="Couldn't load this task." (retry)="taskResource.reload()" />
+  } @else if (loadError(); as loadError) {
+    <app-error-state [message]="loadError" (retry)="retryLoad()" />
   } @else {
     <div class="border border-dashed border-rule px-6 py-14 text-center" role="alert">
       <p class="font-medium text-ink">We couldn't find that task.</p>

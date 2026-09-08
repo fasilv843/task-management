@@ -1,30 +1,27 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  DestroyRef,
-  computed,
-  inject,
-  signal,
-  viewChild,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, viewChild } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
-import { rxResource, takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { map } from 'rxjs';
 
 import { CommentForm } from '../../components/comment-form/comment-form';
+import { CommonBackButton } from '../../components/common-back-button/common-back-button';
 import { CommonButton } from '../../components/common-button/common-button';
 import { CommonStatus } from '../../components/common-status/common-status';
 import { CommentThread } from '../../components/comment-thread/comment-thread';
 import { ErrorState } from '../../components/error-state/error-state';
 import { RichTextContent } from '../../components/rich-text-content/rich-text-content';
-import { isBeforeToday } from '../../utils/date.utils';
-import { TaskStore } from '../../services/task-store';
+import { mobxToSignal } from '../../state/mobx-to-signal';
 import { CommentReply } from '../../services/comment.types';
-import { TASK_STATUS_LABELS, TASK_STATUS_TONES, TaskStatus } from '../../services/task.types';
-import { buildCommentTree } from './comment-tree.utils';
-import { CommonBackButton } from "../../components/common-back-button/common-back-button";
+import { TASK_STATUS_LABELS, TASK_STATUS_TONES } from '../../services/task.types';
+import { TaskDetailsStore } from './task-details.store';
 
+/**
+ * The task details page: the task, its thread, and the composer.
+ *
+ * All of the state — which task, which reply box, what a save is doing — lives
+ * in `TaskDetailsStore`, provided here so it is created and destroyed with the
+ * page. This class binds that state to the template and forwards events back.
+ * The only decisions it makes are the two the DOM owns: showing the delete
+ * confirmation, and clearing the composer after a successful post.
+ */
 @Component({
   selector: 'app-task-details',
   imports: [
@@ -37,169 +34,71 @@ import { CommonBackButton } from "../../components/common-back-button/common-bac
     CommentThread,
     CommonBackButton,
   ],
+  providers: [TaskDetailsStore],
   templateUrl: './task-details.html',
   styleUrl: './task-details.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TaskDetails {
-  private readonly taskStore = inject(TaskStore);
-  private readonly router = inject(Router);
-  private readonly route = inject(ActivatedRoute);
-  private readonly destroyRef = inject(DestroyRef);
+  private readonly store = inject(TaskDetailsStore);
 
-  readonly TaskStatus = TaskStatus;
   readonly statusLabels = TASK_STATUS_LABELS;
   readonly statusTones = TASK_STATUS_TONES;
 
-  private readonly routeId = toSignal(this.route.paramMap.pipe(map((params) => params.get('id'))), {
-    initialValue: null,
-  });
-
-  readonly taskId = computed(() => this.routeId());
-
-  /**
-   * One read for the whole page. `comments: true` is this fake API's
-   * `?comments=true` — the task and its thread arrive together rather than
-   * costing a second request and a second set of loading states.
-   */
-  readonly taskResource = rxResource({
-    // An undefined param keeps the resource idle, which is how an unparseable
-    // `:id` falls through to the not-found branch without a request.
-    params: () => this.taskId() ?? undefined,
-    stream: ({ params }) => this.taskStore.getTaskById(params, { comments: true }),
-  });
-
-  readonly isLoading = computed(() => this.taskResource.isLoading());
-
-  readonly loadError = computed(() => this.taskResource.error());
-
-  /** Reading `value()` on a failed resource throws, so the error is checked first. */
-  readonly task = computed(() =>
-    this.taskResource.error() ? undefined : this.taskResource.value(),
-  );
-
-  readonly commentTree = computed(() => buildCommentTree(this.task()?.comments ?? []));
-
-  readonly commentCount = computed(() => this.task()?.comments.length ?? 0);
-
-  readonly isOverdue = computed(() => {
-    const task = this.task();
-
-    if (!task || task.status === TaskStatus.COMPLETED) {
-      return false;
-    }
-
-    return isBeforeToday(task.deadline);
-  });
-
-  /** Which comment's reply box is open. Only ever one, so errors have one home. */
-  readonly activeReplyId = signal<string | null>(null);
-
-  readonly isSavingComment = signal(false);
-
-  readonly commentError = signal<string | null>(null);
-
-  /** Announced politely; the change is otherwise only visible further down the page. */
-  readonly statusMessage = signal<string | null>(null);
-
-  readonly deleteError = signal<string | null>(null);
+  readonly task = mobxToSignal(() => this.store.task);
+  readonly commentTree = mobxToSignal(() => this.store.commentTree);
+  readonly commentCount = mobxToSignal(() => this.store.commentCount);
+  readonly isOverdue = mobxToSignal(() => this.store.isOverdue);
+  readonly isLoading = mobxToSignal(() => this.store.isLoading);
+  readonly loadError = mobxToSignal(() => this.store.loadError);
+  readonly activeReplyId = mobxToSignal(() => this.store.activeReplyId);
+  readonly isSavingComment = mobxToSignal(() => this.store.isSavingComment);
+  readonly commentError = mobxToSignal(() => this.store.commentError);
+  readonly topLevelCommentError = mobxToSignal(() => this.store.topLevelCommentError);
+  readonly statusMessage = mobxToSignal(() => this.store.statusMessage);
+  readonly deleteError = mobxToSignal(() => this.store.deleteError);
 
   private readonly topLevelForm = viewChild(CommentForm);
 
-  addComment(text: string): void {
-    this.submitComment(text, null);
+  async addComment(text: string): Promise<void> {
+    const saved = await this.store.addComment(text);
+
+    // Only the top-level box is cleared here. A reply box is destroyed along
+    // with its node, and clearing that one would wipe an unsent draft.
+    if (saved) {
+      this.topLevelForm()?.reset();
+    }
   }
 
   addReply(reply: CommentReply): void {
-    this.submitComment(reply.text, reply.parentCommentId);
+    void this.store.addReply(reply);
   }
 
   openReply(commentId: string): void {
-    // Reopening the same box closes it, and opening another moves the single
-    // form rather than stacking a second one.
-    this.activeReplyId.update((current) => (current === commentId ? null : commentId));
-    this.commentError.set(null);
+    this.store.openReply(commentId);
   }
 
   cancelReply(): void {
-    this.activeReplyId.set(null);
-    this.commentError.set(null);
+    this.store.cancelReply();
+  }
+
+  retryLoad(): void {
+    this.store.retryLoad();
   }
 
   editTask(): void {
-    const taskId = this.taskId();
-
-    if (taskId !== null) {
-      this.router.navigate(['/tasks/update', taskId]);
-    }
+    this.store.editTask();
   }
 
   deleteTask(): void {
     const task = this.task();
 
-    if (!task) {
-      return;
+    if (task && confirm(`Delete "${task.title}"?`)) {
+      void this.store.deleteTask();
     }
-
-    const confirmed = confirm(`Delete "${task.title}"?`);
-
-    if (!confirmed) {
-      return;
-    }
-
-    // Goes through the store so the task and its comments disappear together.
-    this.taskStore
-      .deleteTask(task.id)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => this.router.navigate(['/tasks']),
-        error: () => this.deleteError.set("Couldn't delete the task. Please try again."),
-      });
   }
 
   backToTasks(): void {
-    this.router.navigate(['/tasks']);
-  }
-
-  /**
-   * The single write path: a reply is just a comment with a parent, which is
-   * what lets the thread nest without limit.
-   */
-  private submitComment(text: string, parentCommentId: string | null): void {
-    const taskId = this.taskId();
-
-    if (taskId === null || this.isSavingComment()) {
-      return;
-    }
-
-    this.isSavingComment.set(true);
-    this.commentError.set(null);
-    this.statusMessage.set(null);
-
-    // Subscribing is deliberate: this is a command, not view state, and every
-    // result lands in a signal — which is what keeps zoneless rendering correct.
-    this.taskStore
-      .addComment({ taskId, parentCommentId, text })
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          this.isSavingComment.set(false);
-          this.activeReplyId.set(null);
-
-          // Only the top-level box survives the save; a reply box is destroyed
-          // with its node, and clearing it here would wipe an unsent draft.
-          if (parentCommentId === null) {
-            this.topLevelForm()?.reset();
-          }
-
-          // Synchronous — the store is already seeded, so this costs no request.
-          this.taskResource.reload();
-          this.statusMessage.set(parentCommentId === null ? 'Comment added.' : 'Reply added.');
-        },
-        error: () => {
-          this.isSavingComment.set(false);
-          this.commentError.set("Couldn't post that. Please try again.");
-        },
-      });
+    void this.store.goToTasks();
   }
 }

@@ -1,18 +1,13 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  DestroyRef,
   computed,
   effect,
   inject,
   signal,
   untracked,
 } from '@angular/core';
-import { Location } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { rxResource, takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { map } from 'rxjs';
 
 import {
   CommonDateInput,
@@ -25,12 +20,22 @@ import { CommonSelect } from '../../components/common-select/common-select';
 import { ErrorState } from '../../components/error-state/error-state';
 import { RichTextEditor } from '../../components/rich-text-editor/rich-text-editor';
 import { FocusFirstInvalidDirective } from '../../shared/directives/focus-first-invalid.directive';
-import { TaskStore } from '../../services/task-store';
+import { mobxToSignal } from '../../state/mobx-to-signal';
 import { TASK_STATUS_LABELS, TaskDraft, TaskStatus } from '../../services/task.types';
 import { nonBlank, notInPast } from '../../shared/form.validators';
+import { TaskFormStore } from './task-form.store';
 import { TaskStatusOption } from './task-form.types';
 import { richTextRequired } from './task-form.validators';
 
+/**
+ * The create/update page.
+ *
+ * The form is this class's responsibility — Reactive Forms is already a state
+ * layer, and mirroring it into MobX would give us two copies of the same truth.
+ * Everything around the form (which mode, whether the task loaded, what happens
+ * on submit, where Cancel goes) lives in `TaskFormStore`, provided here so it
+ * is created and destroyed with the page.
+ */
 @Component({
   selector: 'app-task-form',
   imports: [
@@ -44,46 +49,40 @@ import { richTextRequired } from './task-form.validators';
     RichTextEditor,
     FocusFirstInvalidDirective,
   ],
+  providers: [TaskFormStore],
   templateUrl: './task-form.html',
   styleUrl: './task-form.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TaskForm {
-  private readonly taskStore = inject(TaskStore);
+  private readonly store = inject(TaskFormStore);
   private readonly formBuilder = inject(FormBuilder);
-  private readonly router = inject(Router);
-  private readonly route = inject(ActivatedRoute);
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly location = inject(Location);
 
   readonly statusOptions: TaskStatusOption[] = Object.values(TaskStatus).map((value) => ({
     value,
     label: TASK_STATUS_LABELS[value],
   }));
 
-  private readonly routeId = toSignal(this.route.paramMap.pipe(map((params) => params.get('id'))), {
-    initialValue: null,
-  });
+  private readonly task = mobxToSignal(() => this.store.task);
 
-  /** `tasks/create` has no `:id`; `tasks/update/:id` does. That is the whole mode switch. */
-  readonly mode = computed(() =>
-    this.routeId() === null ? 'create' : 'update',
-  );
+  readonly isLoadingTask = mobxToSignal(() => this.store.isLoadingTask);
+  readonly loadError = mobxToSignal(() => this.store.loadError);
+  readonly isTaskMissing = mobxToSignal(() => this.store.isTaskMissing);
+  readonly canShowForm = mobxToSignal(() => this.store.canShowForm);
+  readonly isSaving = mobxToSignal(() => this.store.isSaving);
+  readonly saveError = mobxToSignal(() => this.store.saveError);
+  readonly pageTitle = mobxToSignal(() => this.store.pageTitle);
+  readonly submitButtonLabel = mobxToSignal(() => this.store.submitButtonLabel);
 
-  readonly isUpdateMode = computed(() => this.mode() === 'update');
+  /**
+   * The deadline the task was loaded with, so editing an already-overdue task
+   * stays possible. Null in create mode, which is what makes `notInPast` apply
+   * its normal floor there.
+   */
+  private readonly originalDeadline = computed(() => this.task()?.deadline ?? null);
 
-  readonly taskId = computed(() => this.routeId());
-
-  readonly taskResource = rxResource({
-    // Undefined params keep the resource idle, so create mode never fetches.
-    params: () => this.taskId() ?? undefined,
-    stream: ({ params }) => this.taskStore.getTaskById(params),
-  });
-
-  /** The deadline the task was loaded with, so editing an already-overdue task stays possible. */
-  private readonly originalDeadline = signal<string | null>(null);
-
-  private readonly hasPatchedForm = signal(false);
+  /** Keeps the picker's floor in step with `notInPast`, exemption included. */
+  readonly minDeadline = computed(() => earliestSelectable(this.originalDeadline()));
 
   readonly form = this.formBuilder.nonNullable.group({
     title: ['', [Validators.required, nonBlank, Validators.maxLength(100)]],
@@ -92,59 +91,18 @@ export class TaskForm {
     status: [TaskStatus.PENDING, [Validators.required]],
   });
 
-  /** Keeps the picker's floor in step with `notInPast`, exemption included. */
-  readonly minDeadline = computed(() => earliestSelectable(this.originalDeadline()));
-
-  readonly isSaving = signal(false);
-
-  readonly saveError = signal<string | null>(null);
-
-  readonly isLoadingTask = computed(() => this.isUpdateMode() && this.taskResource.isLoading());
-
-  readonly loadError = computed(() =>
-    this.isUpdateMode() ? this.taskResource.error() : undefined,
-  );
-
-  readonly isTaskMissing = computed(
-    () =>
-      this.isUpdateMode() &&
-      !this.taskResource.isLoading() &&
-      !this.taskResource.error() &&
-      this.taskResource.value() === undefined,
-  );
-
-  readonly canShowForm = computed(
-    () => !this.isLoadingTask() && !this.loadError() && !this.isTaskMissing(),
-  );
-
-  readonly pageTitle = computed(() =>
-    this.mode() === 'create' ? 'Create Task' : 'Update Task',
-  );
-
-  readonly submitLabel = computed(() =>
-    this.mode() === 'create' ? 'Create' : 'Update',
-  );
-
-  readonly submitButtonLabel = computed(() =>
-    this.isSaving() ? 'Saving…' : this.submitLabel(),
-  );
+  private readonly hasPatchedForm = signal(false);
 
   constructor() {
-    // Fill the form once the task arrives in update mode. Guarded so a resource
-    // reload can never overwrite edits already in progress.
+    // Fill the form once the task arrives in update mode. Guarded so a later
+    // store change can never overwrite edits already in progress.
     effect(() => {
-      // Reading value() on a failed resource throws, so bail on the error first.
-      if (this.taskResource.error()) {
-        return;
-      }
-
-      const task = this.taskResource.value();
+      const task = this.task();
 
       if (!task || untracked(this.hasPatchedForm)) {
         return;
       }
 
-      this.originalDeadline.set(task.deadline);
       this.form.setValue({
         title: task.title,
         description: task.description,
@@ -161,45 +119,22 @@ export class TaskForm {
       // real submit event — keeping it here means a programmatic call still
       // reveals the messages.
       this.form.markAllAsTouched();
+
       return;
     }
-
-    if (this.isSaving()) {
-      return;
-    }
-
-    this.isSaving.set(true);
-    this.saveError.set(null);
 
     const draft: TaskDraft = this.form.getRawValue();
-    const taskId = this.taskId();
 
-    const save =
-      this.isUpdateMode() && taskId !== null
-        ? this.taskStore.updateTask(taskId, draft)
-        : this.taskStore.createTask(draft);
-
-    // Subscribing is deliberate here: this is a command, not view state. Every
-    // result lands in a signal, which is what keeps zoneless rendering correct.
-    save.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: () => {
-        this.isSaving.set(false);
-        this.router.navigate(['/tasks']);
-      },
-      error: (error: unknown) => {
-        this.isSaving.set(false);
-        this.saveError.set(
-          error instanceof Error ? error.message : "Couldn't save the task. Please try again.",
-        );
-      },
-    });
+    // The store decides create vs update and navigates on success; a failure
+    // leaves the form up with `saveError` showing.
+    void this.store.save(draft);
   }
 
   onCancel(): void {
-    if (history.length > 1) {
-      this.location.back();
-    } else {
-      this.router.navigate(['/tasks']);
-    }
+    this.store.cancel();
+  }
+
+  retryLoad(): void {
+    this.store.retryLoad();
   }
 }

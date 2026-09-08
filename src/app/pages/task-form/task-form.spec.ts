@@ -6,6 +6,8 @@ import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/route
 import { of } from 'rxjs';
 
 import { TaskForm } from './task-form';
+import { TaskFormStore } from './task-form.store';
+import { TaskFormMode } from './task-form.types';
 import { TaskRow, TaskStatus } from '../../services/task.types';
 
 const existingTask: TaskRow = {
@@ -40,6 +42,27 @@ async function setUp(params: Record<string, string>): Promise<ComponentFixture<T
   return fixture;
 }
 
+/**
+ * Answers the task fetch and lets the page finish reacting to it.
+ *
+ * Two settles, deliberately. The store resolves its fetch through a promise, so
+ * the state lands one microtask after the flush; the effect that fills the form
+ * from it is scheduled on the one after that. A single `whenStable` returns in
+ * between and would see an empty form.
+ */
+async function flushTasks(fixture: ComponentFixture<TaskForm>, rows: TaskRow[]): Promise<void> {
+  TestBed.inject(HttpTestingController).expectOne('assets/tasks.json').flush(rows);
+
+  await fixture.whenStable();
+  await fixture.whenStable();
+  fixture.detectChanges();
+}
+
+/** The page's own store, provided by the component rather than the root injector. */
+function storeOf(fixture: ComponentFixture<TaskForm>): TaskFormStore {
+  return fixture.debugElement.injector.get(TaskFormStore);
+}
+
 /** Reads the message rendered by the `app-form-validation-error` with this id. */
 function errorTextFor(fixture: ComponentFixture<TaskForm>, fieldId: string): string {
   const host = fixture.nativeElement.querySelector(`#${fieldId}`) as HTMLElement | null;
@@ -61,7 +84,7 @@ describe('TaskForm', () => {
       const fixture = await setUp({});
       const component = fixture.componentInstance;
 
-      expect(component.mode()).toBe('create');
+      expect(storeOf(fixture).mode).toBe(TaskFormMode.CREATE);
       expect(component.form.getRawValue()).toEqual({
         title: '',
         description: '',
@@ -70,10 +93,13 @@ describe('TaskForm', () => {
       });
     });
 
-    it('does not fetch a task', async () => {
+    it('loads the collection up front so a create can save without waiting', async () => {
       await setUp({});
 
-      TestBed.inject(HttpTestingController).expectNone('assets/tasks.json');
+      // The new task is appended to the collection, so it has to be in memory
+      // either way. Fetching while the user fills the form beats fetching on
+      // submit — and the form is shown immediately regardless.
+      TestBed.inject(HttpTestingController).expectOne('assets/tasks.json');
     });
 
     it('reports required fields only after a submit attempt', async () => {
@@ -132,12 +158,9 @@ describe('TaskForm', () => {
       const fixture = await setUp({ id: '1' });
       const component = fixture.componentInstance;
 
-      expect(component.mode()).toBe('update');
+      expect(storeOf(fixture).mode).toBe(TaskFormMode.UPDATE);
 
-      TestBed.inject(HttpTestingController)
-        .expectOne('assets/tasks.json')
-        .flush([existingTask]);
-      await fixture.whenStable();
+      await flushTasks(fixture, [existingTask]);
 
       expect(component.form.getRawValue()).toEqual({
         title: existingTask.title,
@@ -151,10 +174,7 @@ describe('TaskForm', () => {
       const fixture = await setUp({ id: '1' });
       const component = fixture.componentInstance;
 
-      TestBed.inject(HttpTestingController)
-        .expectOne('assets/tasks.json')
-        .flush([{ ...existingTask, deadline: '2000-01-01' }]);
-      await fixture.whenStable();
+      await flushTasks(fixture, [{ ...existingTask, deadline: '2000-01-01' }]);
 
       expect(component.form.controls.deadline.valid).toBe(true);
 
@@ -167,8 +187,7 @@ describe('TaskForm', () => {
       const fixture = await setUp({ id: '999' });
       const component = fixture.componentInstance;
 
-      TestBed.inject(HttpTestingController).expectOne('assets/tasks.json').flush([existingTask]);
-      await fixture.whenStable();
+      await flushTasks(fixture, [existingTask]);
 
       expect(component.isTaskMissing()).toBe(true);
       expect(component.canShowForm()).toBe(false);
@@ -181,6 +200,7 @@ describe('TaskForm', () => {
       TestBed.inject(HttpTestingController)
         .expectOne('assets/tasks.json')
         .error(new ProgressEvent('network error'));
+      await fixture.whenStable();
       await fixture.whenStable();
 
       expect(component.loadError()).toBeTruthy();

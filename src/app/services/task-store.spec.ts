@@ -3,9 +3,10 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 
+import { CommentStore } from './comment-store';
 import { TaskStore } from './task-store';
-import { CommentRow, TaskComment } from './comment.types';
-import { Task, TaskRow, TaskStatus, TaskWithComments } from './task.types';
+import { CommentRow } from './comment.types';
+import { TaskRow, TaskStatus } from './task.types';
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -36,13 +37,6 @@ const seedComments: CommentRow[] = [
   },
   {
     id: '2',
-    task_id: '1',
-    parent_comment_id: '1',
-    text: 'Agreed.',
-    created_at: '2099-01-01T10:00:00.000Z',
-  },
-  {
-    id: '3',
     task_id: '2',
     parent_comment_id: null,
     text: 'Rows are in.',
@@ -52,6 +46,7 @@ const seedComments: CommentRow[] = [
 
 describe('TaskStore', () => {
   let store: TaskStore;
+  let commentStore: CommentStore;
   let httpTesting: HttpTestingController;
 
   beforeEach(() => {
@@ -64,250 +59,192 @@ describe('TaskStore', () => {
     });
 
     store = TestBed.inject(TaskStore);
+    commentStore = TestBed.inject(CommentStore);
     httpTesting = TestBed.inject(HttpTestingController);
   });
 
   afterEach(() => httpTesting.verify());
 
-  /** Seeds the in-memory task store by resolving the one-time JSON fetch. */
-  function seedTaskStore(): void {
-    store.getTasks().subscribe();
+  /**
+   * Seeds the store by starting the load and answering its one fetch.
+   *
+   * The load is awaited afterwards rather than before, because `flush` is what
+   * resolves it — awaiting first would deadlock.
+   */
+  async function seedTaskStore(): Promise<void> {
+    const loading = store.loadTasks();
     httpTesting.expectOne('assets/tasks.json').flush(structuredClone(seedTasks));
+    await loading;
   }
 
-  /** Same, for comments. They seed independently of tasks. */
-  function seedCommentStore(): void {
-    store.getComments('1').subscribe();
+  async function seedCommentStore(): Promise<void> {
+    const loading = commentStore.loadComments();
     httpTesting.expectOne('assets/comments.json').flush(structuredClone(seedComments));
+    await loading;
   }
 
-  it('fetches the seed data only once', () => {
-    seedTaskStore();
+  it('fetches the seed data only once', async () => {
+    await seedTaskStore();
 
-    let secondResult: Task[] | undefined;
-    store.getTasks().subscribe((tasks) => (secondResult = tasks));
+    await store.loadTasks();
 
     httpTesting.expectNone('assets/tasks.json');
-    expect(secondResult?.length).toBe(2);
+    expect(store.tasks.length).toBe(2);
   });
 
-  it('assigns a uuid when creating and keeps the task in the store', () => {
-    seedTaskStore();
+  it('reports a failed load and recovers on retry', async () => {
+    const loading = store.loadTasks();
+    httpTesting.expectOne('assets/tasks.json').error(new ProgressEvent('failed'));
+    await loading;
 
-    let created: Task | undefined;
-    store
-      .createTask({
-        title: 'Write the form',
-        description: '<p>With Quill.</p>',
-        deadline: '2099-03-01',
-        status: TaskStatus.PENDING,
-      })
-      .subscribe((task) => (created = task));
+    expect(store.loadError).toBeTruthy();
+    expect(store.hasLoaded).toBe(false);
+
+    const retrying = store.reloadTasks();
+    httpTesting.expectOne('assets/tasks.json').flush(structuredClone(seedTasks));
+    await retrying;
+
+    expect(store.loadError).toBeNull();
+    expect(store.tasks.length).toBe(2);
+  });
+
+  it('keeps hasLoaded latched while a reload is in flight', async () => {
+    await seedTaskStore();
+
+    const reloading = store.reloadTasks();
+
+    expect(store.isLoading).toBe(true);
+    expect(store.hasLoaded).toBe(true);
+
+    httpTesting.expectOne('assets/tasks.json').flush(structuredClone(seedTasks));
+    await reloading;
+  });
+
+  it('assigns a uuid when creating and keeps the task in the store', async () => {
+    await seedTaskStore();
+
+    const created = await store.createTask({
+      title: 'Write the form',
+      description: '<p>With Quill.</p>',
+      deadline: '2099-03-01',
+      status: TaskStatus.PENDING,
+    });
 
     expect(created?.id).toMatch(UUID_PATTERN);
-
-    let tasks: Task[] | undefined;
-    store.getTasks().subscribe((result) => (tasks = result));
-    expect(tasks?.length).toBe(3);
-    expect(tasks?.at(-1)?.title).toBe('Write the form');
+    expect(store.tasks.length).toBe(3);
+    expect(store.tasks.at(-1)?.title).toBe('Write the form');
   });
 
-  it('seeds the store on demand when creating without a prior read', () => {
-    let created: Task | undefined;
-    store
-      .createTask({
-        title: 'Deep-linked create',
-        description: '<p>No list visit first.</p>',
-        deadline: '2099-03-01',
-        status: TaskStatus.PENDING,
-      })
-      .subscribe((task) => (created = task));
+  it('seeds the store on demand when creating without a prior read', async () => {
+    const creating = store.createTask({
+      title: 'Deep-linked create',
+      description: '<p>No list visit first.</p>',
+      deadline: '2099-03-01',
+      status: TaskStatus.PENDING,
+    });
 
     httpTesting.expectOne('assets/tasks.json').flush(structuredClone(seedTasks));
 
-    expect(created?.id).toMatch(UUID_PATTERN);
+    expect((await creating)?.id).toMatch(UUID_PATTERN);
   });
 
-  it('replaces the task in place on update', () => {
-    seedTaskStore();
+  it('replaces the task in place on update', async () => {
+    await seedTaskStore();
 
-    store
-      .updateTask('1', {
-        title: 'Renamed',
-        description: '<p>Changed.</p>',
-        deadline: '2099-01-15',
-        status: TaskStatus.PENDING,
-      })
-      .subscribe();
+    await store.updateTask('1', {
+      title: 'Renamed',
+      description: '<p>Changed.</p>',
+      deadline: '2099-01-15',
+      status: TaskStatus.PENDING,
+    });
 
-    let tasks: Task[] | undefined;
-    store.getTasks().subscribe((result) => (tasks = result));
-
-    expect(tasks?.[0]).toEqual({
+    expect(store.tasks[0]).toEqual({
       id: '1',
       title: 'Renamed',
       description: '<p>Changed.</p>',
       deadline: '2099-01-15',
       status: TaskStatus.PENDING,
     });
-    expect(tasks?.length).toBe(2);
+    expect(store.tasks.length).toBe(2);
   });
 
-  it('errors when updating a task that no longer exists', () => {
-    seedTaskStore();
+  it('reports a failure when updating a task that no longer exists', async () => {
+    await seedTaskStore();
 
-    let caught: unknown;
-    store
-      .updateTask('99', {
-        title: 'Ghost',
-        description: '<p>Gone.</p>',
-        deadline: '2099-01-15',
-        status: TaskStatus.PENDING,
-      })
-      .subscribe({ error: (error: unknown) => (caught = error) });
+    const updated = await store.updateTask('99', {
+      title: 'Ghost',
+      description: '<p>Gone.</p>',
+      deadline: '2099-01-15',
+      status: TaskStatus.PENDING,
+    });
 
-    expect(caught).toBeInstanceOf(Error);
+    expect(updated).toBeNull();
+    expect(store.saveError).toBe('Task 99 no longer exists.');
   });
 
-  it('removes a deleted task for good', () => {
-    seedTaskStore();
+  it('removes a deleted task for good', async () => {
+    await seedTaskStore();
 
-    store.deleteTask('1').subscribe();
+    await expect(store.deleteTask('1')).resolves.toBe(true);
 
-    let tasks: Task[] | undefined;
-    store.getTasks().subscribe((result) => (tasks = result));
-
-    expect(tasks?.map((task) => task.id)).toEqual(['2']);
+    expect(store.tasks.map((task) => task.id)).toEqual(['2']);
   });
 
-  it('finds a single task by id from the store', () => {
-    seedTaskStore();
+  it('drops the comments of a deleted task', async () => {
+    await seedTaskStore();
+    await seedCommentStore();
 
-    let found: Task | undefined;
-    store.getTaskById('2').subscribe((task) => (found = task));
+    await store.deleteTask('1');
 
-    expect(found?.title).toBe('Implement task list');
+    expect(commentStore.commentsFor('1')).toEqual([]);
+    expect(commentStore.commentsFor('2').length).toBe(1);
   });
 
-  describe('comments', () => {
-    it('maps the stored columns onto the app model', () => {
-      let comments: TaskComment[] | undefined;
-      store.getComments('1').subscribe((result) => (comments = result));
-      httpTesting.expectOne('assets/comments.json').flush(structuredClone(seedComments));
+  it('finds a single task by id from the store', async () => {
+    await seedTaskStore();
 
-      expect(comments?.[1]).toEqual({
-        id: '2',
-        taskId: '1',
-        parentCommentId: '1',
-        text: 'Agreed.',
-        createdAt: '2099-01-01T10:00:00.000Z',
-      });
+    expect(store.taskById('2')?.title).toBe('Implement task list');
+    expect(store.taskById('99')).toBeUndefined();
+  });
+
+  describe('derived views', () => {
+    it('marks a past deadline overdue unless the task is completed', async () => {
+      const overdueRows: TaskRow[] = [
+        { ...seedTasks[0], id: 'past-completed', deadline: '2000-01-01' },
+        {
+          ...seedTasks[1],
+          id: 'past-in-progress',
+          deadline: '2000-01-01',
+          status: TaskStatus.IN_PROGRESS,
+        },
+      ];
+
+      const loading = store.loadTasks();
+      httpTesting.expectOne('assets/tasks.json').flush(overdueRows);
+      await loading;
+
+      expect(store.taskItems.map((task) => task.isOverdue)).toEqual([false, true]);
+      expect(store.overdueCount).toBe(1);
     });
 
-    it('fetches the seed data only once and filters by task', () => {
-      seedCommentStore();
+    it('counts the tasks by status', async () => {
+      await seedTaskStore();
 
-      let comments: TaskComment[] | undefined;
-      store.getComments('2').subscribe((result) => (comments = result));
-
-      httpTesting.expectNone('assets/comments.json');
-      expect(comments?.map((comment) => comment.id)).toEqual(['3']);
+      expect(store.totalCount).toBe(2);
+      expect(store.inProgressCount).toBe(1);
     });
 
-    it('returns an empty thread for a task nobody has commented on', () => {
-      seedCommentStore();
+    it('maps each task onto a linkable, labelled calendar event', async () => {
+      await seedTaskStore();
 
-      let comments: TaskComment[] | undefined;
-      store.getComments('99').subscribe((result) => (comments = result));
+      const [event] = store.calendarEvents;
 
-      expect(comments).toEqual([]);
-    });
-
-    it('assigns a uuid and a timestamp when adding', () => {
-      seedCommentStore();
-
-      let created: TaskComment | undefined;
-      store
-        .addComment({ taskId: '2', parentCommentId: null, text: 'Looks good.' })
-        .subscribe((comment) => (created = comment));
-
-      expect(created?.id).toMatch(UUID_PATTERN);
-      expect(created?.createdAt).toBeTruthy();
-
-      let comments: TaskComment[] | undefined;
-      store.getComments('2').subscribe((result) => (comments = result));
-      expect(comments?.map((comment) => comment.text)).toEqual(['Rows are in.', 'Looks good.']);
-    });
-
-    it('seeds on demand when adding without a prior read', () => {
-      let created: TaskComment | undefined;
-      store
-        .addComment({ taskId: '1', parentCommentId: null, text: 'Deep-linked.' })
-        .subscribe((comment) => (created = comment));
-
-      httpTesting.expectOne('assets/comments.json').flush(structuredClone(seedComments));
-
-      expect(created?.id).toMatch(UUID_PATTERN);
-    });
-
-    it('persists the parent when adding a reply', () => {
-      seedCommentStore();
-
-      let created: TaskComment | undefined;
-      store
-        .addComment({ taskId: '1', parentCommentId: '2', text: 'Nested.' })
-        .subscribe((comment) => (created = comment));
-
-      expect(created?.parentCommentId).toBe('2');
-
-      let comments: TaskComment[] | undefined;
-      store.getComments('1').subscribe((result) => (comments = result));
-      expect(comments?.find((comment) => comment.text === 'Nested.')?.parentCommentId).toBe('2');
-    });
-
-    it('answers a task and its thread from one read when comments are requested', () => {
-      let result: TaskWithComments | undefined;
-      store.getTaskById('1', { comments: true }).subscribe((task) => (result = task));
-
-      httpTesting.expectOne('assets/tasks.json').flush(structuredClone(seedTasks));
-      httpTesting.expectOne('assets/comments.json').flush(structuredClone(seedComments));
-
-      expect(result?.title).toBe('Design authentication flow');
-      expect(result?.comments.map((comment) => comment.id)).toEqual(['1', '2']);
-    });
-
-    it('serves a second combined read entirely from the store', () => {
-      seedTaskStore();
-      seedCommentStore();
-
-      let result: TaskWithComments | undefined;
-      store.getTaskById('2', { comments: true }).subscribe((task) => (result = task));
-
-      httpTesting.expectNone('assets/tasks.json');
-      httpTesting.expectNone('assets/comments.json');
-      expect(result?.comments.map((comment) => comment.id)).toEqual(['3']);
-    });
-
-    it('skips the comment read when the task does not exist', () => {
-      seedTaskStore();
-
-      let result: TaskWithComments | undefined | 'unset' = 'unset';
-      store.getTaskById('99', { comments: true }).subscribe((task) => (result = task));
-
-      httpTesting.expectNone('assets/comments.json');
-      expect(result).toBeUndefined();
-    });
-
-    it('drops the comments of a deleted task', () => {
-      seedTaskStore();
-      seedCommentStore();
-
-      store.deleteTask('1').subscribe();
-
-      let comments: TaskComment[] | undefined;
-      store.getComments('1').subscribe((result) => (comments = result));
-
-      expect(comments).toEqual([]);
+      expect(event.id).toBe('1');
+      expect(event.date).toBe('2099-01-15');
+      // A real href is what keeps an event keyboard reachable.
+      expect(event.url).toBe('/tasks/1');
+      // Status reaches the label, so colour is never the only carrier of it.
+      expect(event.ariaLabel).toContain('Completed');
     });
   });
 });

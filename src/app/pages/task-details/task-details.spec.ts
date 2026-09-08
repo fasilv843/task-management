@@ -185,9 +185,8 @@ describe('TaskDetails', () => {
     expect(threadCount(fixture)).toBe(5);
 
     // Depth 4 is one past the deepest seeded comment — nesting is not capped.
-    const added = fixture.componentInstance
-      .commentTree()[0]
-      .replies[0].replies[0].replies[0].replies[0];
+    const added =
+      fixture.componentInstance.commentTree()[0].replies[0].replies[0].replies[0].replies[0];
     expect(added.text).toBe('Level five');
     expect(added.depth).toBe(4);
 
@@ -211,8 +210,9 @@ describe('TaskDetails', () => {
 
     const httpTesting = TestBed.inject(HttpTestingController);
     httpTesting.expectOne('assets/tasks.json').flush(structuredClone(seedTasks));
-    // The task is missing, so the thread is never asked for.
-    httpTesting.expectNone('assets/comments.json');
+    // Both stores load in parallel now, so the thread is fetched regardless and
+    // simply turns up empty for an id no task owns.
+    httpTesting.expectOne('assets/comments.json').flush(structuredClone(seedComments));
 
     await fixture.whenStable();
     fixture.detectChanges();
@@ -228,8 +228,9 @@ describe('TaskDetails', () => {
 
     const httpTesting = TestBed.inject(HttpTestingController);
     httpTesting.expectOne('assets/tasks.json').flush(structuredClone(seedTasks));
-    // The task is missing, so the thread is never asked for.
-    httpTesting.expectNone('assets/comments.json');
+    // Both stores load in parallel now, so the thread is fetched regardless and
+    // simply turns up empty for an id no task owns.
+    httpTesting.expectOne('assets/comments.json').flush(structuredClone(seedComments));
 
     await fixture.whenStable();
     fixture.detectChanges();
@@ -243,14 +244,16 @@ describe('TaskDetails', () => {
     const fixture = TestBed.createComponent(TaskDetails);
     fixture.detectChanges();
 
-    TestBed.inject(HttpTestingController)
+    const httpTesting = TestBed.inject(HttpTestingController);
+    httpTesting
       .expectOne('assets/tasks.json')
       .flush('nope', { status: 500, statusText: 'Server Error' });
+    httpTesting.expectOne('assets/comments.json').flush(structuredClone(seedComments));
 
     await fixture.whenStable();
     fixture.detectChanges();
 
-    expect(text(fixture)).toContain("Couldn't load this task.");
+    expect(text(fixture)).toContain("Couldn't load your tasks.");
     expect(text(fixture)).toContain('Retry');
   });
 });

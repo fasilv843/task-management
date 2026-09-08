@@ -1,4 +1,4 @@
-import { TaskComment } from '../../services/comment.types';
+import { TaskComment } from './comment.types';
 import { buildCommentTree } from './comment-tree.utils';
 
 function comment(

@@ -15,17 +15,13 @@
       <div class="skeleton-loader mt-8 h-4 w-20 bg-rule"></div>
       <div class="skeleton-loader mt-3 h-10 w-full bg-rule"></div>
     </div>
-  } @else if (loadError()) {
-    <app-error-state message="Couldn't load this task." (retry)="taskResource.reload()" />
+  } @else if (loadError(); as loadError) {
+    <app-error-state [message]="loadError" (retry)="retryLoad()" />
   } @else if (isTaskMissing()) {
     <div class="border border-dashed border-rule px-6 py-14 text-center" role="alert">
       <p class="font-medium text-ink">We couldn't find that task.</p>
       <p class="mt-1 text-sm text-ink-soft">It may have been deleted.</p>
-      <app-common-button
-        class="mt-4"
-        label="Back to tasks"
-        (buttonClick)="onCancel()"
-      />
+      <app-common-button class="mt-4" label="Back to tasks" (buttonClick)="onCancel()" />
     </div>
   } @else {
     <form [formGroup]="form" (ngSubmit)="onSubmit()" appFocusFirstInvalid novalidate>
@@ -72,17 +68,9 @@
       }
 
       <div class="flex flex-wrap items-center justify-end gap-3 border-t border-rule pt-6">
-        <app-common-button
-          variant="subtle"
-          label="Cancel"
-          (buttonClick)="onCancel()"
-        />
+        <app-common-button variant="subtle" label="Cancel" (buttonClick)="onCancel()" />
 
-        <app-common-button
-          type="submit"
-          [label]="submitButtonLabel()"
-          [disabled]="isSaving()"
-        />
+        <app-common-button type="submit" [label]="submitButtonLabel()" [disabled]="isSaving()" />
       </div>
     </form>
   }

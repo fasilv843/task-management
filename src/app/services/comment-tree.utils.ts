@@ -1,4 +1,4 @@
-import { CommentNode, TaskComment } from '../../services/comment.types';
+import { CommentNode, TaskComment } from './comment.types';
 
 /**
  * Turns the flat comment rows into the nested structure the thread renders.
