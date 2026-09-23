@@ -1,7 +1,9 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
-import { CommonTab } from '../../components/common-tab/common-tab';
+
 import { CommonButton } from '../../components/common-button/common-button';
+import { CommonTab } from '../../components/common-tab/common-tab';
+import { TabOption } from '../../components/common-tab/common-tab.types';
 
 @Component({
   selector: 'app-task-list-main',
@@ -17,22 +19,14 @@ import { CommonButton } from '../../components/common-button/common-button';
 export class TaskListMain {
   private readonly router = inject(Router);
 
-  readonly activeView = signal<'list' | 'calendar'>('list');
-
-  readonly viewTabs = [
-    { id: 'list', label: 'List' },
-    { id: 'calendar', label: 'Calendar' },
+  /**
+   * The tabs are links, so the active one follows the URL on its own through
+   * `routerLinkActive` — nothing here needs to read or mirror the route.
+   */
+  readonly viewTabs: readonly TabOption[] = [
+    { label: 'List', route: ['/tasks', 'list'] },
+    { label: 'Calendar', route: ['/tasks', 'calendar'] },
   ];
-
-  switchView(view: string): void {
-    if (view !== 'list' && view !== 'calendar') {
-      return;
-    }
-
-    this.activeView.set(view);
-
-    this.router.navigate(['/tasks', view]);
-  }
 
   addTask(): void {
     this.router.navigate(['/tasks/create']);

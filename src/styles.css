@@ -13,6 +13,10 @@
   --color-rule: #d8dad3;
   --color-accent: #28425a;
   --color-accent-ink: #1d3348;
+  /* Desaturated slate tint of the accent, for marking a surface as the current
+     one (the calendar's today cell). Deliberately outside the state palette
+     below so it can never be mistaken for a status. */
+  --color-accent-bg: #e6ebf0;
 
   /*
    * Intent-based state palette, shared by every surface that needs to signal
@@ -65,20 +69,6 @@ body {
  */
 .field--invalid {
   border-color: var(--color-danger-ink);
-}
-
-/*
- * Focus ring for calendar events.
- *
- * Global for the same reason as the rule above: FullCalendar builds its own DOM
- * inside <app-common-calendar>, and those elements never carry the component's
- * encapsulation attribute, so a component-scoped selector would not reach them.
- * Everything else about the calendar's appearance is set through inherited
- * --fc-* custom properties in common-calendar.css.
- */
-.fc .fc-event:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
 }
 
 /*

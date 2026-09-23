@@ -1,5 +1,6 @@
 import { Location } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-common-back-button',
@@ -10,8 +11,13 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 })
 export class CommonBackButton {
   private readonly location = inject(Location);
+  private readonly router = inject(Router);
 
   goBack() {
-    this.location.back();
+    if (history.length > 1) {
+      this.location.back();
+    } else {
+      this.router.navigate(['/']);
+    }
   }
 }

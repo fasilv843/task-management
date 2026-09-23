@@ -5,7 +5,6 @@ import { rxResource, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { CommonButton } from '../../../components/common-button/common-button';
 import { CommonStatus } from '../../../components/common-status/common-status';
-import { CommonTab } from '../../../components/common-tab/common-tab';
 import { ErrorState } from '../../../components/error-state/error-state';
 import { RichTextContent } from '../../../components/rich-text-content/rich-text-content';
 import { TaskStore } from '../../../services/task-store';
@@ -17,7 +16,6 @@ import {
   TaskListItem,
   TaskStatus,
 } from '../../../services/task.types';
-import { TASK_VIEW_TABS } from '../../../shared/task-view-tabs';
 
 @Component({
   selector: 'app-tasks',
@@ -34,7 +32,6 @@ export class Tasks {
   readonly TaskStatus = TaskStatus;
   readonly statusLabels = TASK_STATUS_LABELS;
   readonly statusTones = TASK_STATUS_TONES;
-  readonly viewTabs = TASK_VIEW_TABS;
 
   readonly tasksResource = rxResource({
     stream: () => this.taskStore.getTasks(),

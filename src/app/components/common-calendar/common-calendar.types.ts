@@ -1,3 +1,36 @@
+/**
+ * The ranges the calendar can be shown in. The values double as the underlying
+ * calendar's registered view names, the same way `RichTextControl`'s values
+ * double as the editor's format names.
+ */
+export enum CalendarView {
+  MONTH = 'dayGridMonth',
+  WEEK = 'dayGridWeek',
+  AGENDA = 'listWeek',
+}
+
+/**
+ * Names for the view switcher buttons, lowercase to match the voice of the
+ * `prev`/`next`/`today` buttons beside them.
+ *
+ * Keyed by the enum on purpose. The agenda view inherits a `list` button-text
+ * key from the view it is built on, and that key is consulted *before* the view
+ * name — so a stray `list` entry here would silently outrank `listWeek` and
+ * rename the button. A `Record` over the enum makes that key unrepresentable.
+ */
+export const CALENDAR_VIEW_LABELS: Record<CalendarView, string> = {
+  [CalendarView.MONTH]: 'month',
+  [CalendarView.WEEK]: 'week',
+  [CalendarView.AGENDA]: 'agenda',
+};
+
+/** The first entry is also the view the calendar opens on. */
+export const DEFAULT_CALENDAR_VIEWS: readonly CalendarView[] = [
+  CalendarView.MONTH,
+  CalendarView.WEEK,
+  CalendarView.AGENDA,
+];
+
 export interface CalendarEventColors {
   /** Event fill. */
   background: string;

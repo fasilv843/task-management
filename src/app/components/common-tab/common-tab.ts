@@ -1,47 +1,58 @@
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 
-import { CommonButton } from '../common-button/common-button';
 import { TabOption } from './common-tab.types';
 
 /**
  * CommonTab
  *
- * A row of buttons standing in for a set of mutually exclusive views — the
- * active one reads as pressed (`filled`), the rest as `subtle`. It only ever
- * emits which tab was picked; the parent decides what that means (switch a
- * local signal, navigate to another route, etc).
+ * A row of navigation tabs for a set of mutually exclusive views that each have
+ * their own route. Every tab is a real `<a href>`, so middle-click, Ctrl/Cmd
+ * click and the right-click "Open link in new tab" menu all behave the way the
+ * browser's own links do — which is the whole reason this is not built on
+ * CommonButton. It carries no button state (no variant, tone, size, disabled)
+ * and emits nothing: the router owns navigation, and `routerLinkActive` owns
+ * which tab reads as current.
  *
  * Usage:
- *   <app-common-tab
- *     [tabs]="taskViewTabs"
- *     [active]="'list'"
- *     ariaLabel="Task views"
- *     (tabSelect)="onViewChange($event)"
- *   />
+ *   <app-common-tab [tabs]="viewTabs" ariaLabel="Task views" />
+ *
+ *   readonly viewTabs: readonly TabOption[] = [
+ *     { label: 'List', route: ['/tasks', 'list'] },
+ *     { label: 'Calendar', route: ['/tasks', 'calendar'] },
+ *   ];
+ *
+ * The markup is a named `<nav>` landmark of links, not the `role="tablist"`
+ * ARIA pattern — that one is for switching in-page panels with roving arrow-key
+ * focus, which these tabs are not doing.
  */
 @Component({
   selector: 'app-common-tab',
-  imports: [CommonButton],
+  imports: [RouterLink, RouterLinkActive],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  styleUrl: './common-tab.css',
   host: { class: 'inline-flex' },
   template: `
-    <div class="flex gap-2" [attr.aria-label]="ariaLabel()">
-      @for (tab of tabs(); track tab.id) {
-        <app-common-button
-          [variant]="tab.id === active() ? 'filled' : 'subtle'"
-          size="sm"
-          [label]="tab.label"
-          [attr.aria-current]="tab.id === active() ? 'page' : null"
-          (buttonClick)="tabSelect.emit(tab.id)"
-        />
-      }
-    </div>
+    <nav [attr.aria-label]="ariaLabel()">
+      <ul class="tabs">
+        @for (tab of tabs(); track tab.label) {
+          <li>
+            <a
+              class="tab"
+              [routerLink]="tab.route"
+              routerLinkActive="tab--active"
+              [routerLinkActiveOptions]="{ exact: true }"
+              ariaCurrentWhenActive="page"
+              >{{ tab.label }}</a
+            >
+          </li>
+        }
+      </ul>
+    </nav>
   `,
 })
 export class CommonTab {
   readonly tabs = input.required<readonly TabOption[]>();
-  readonly active = input<string>();
-  readonly ariaLabel = input<string>();
-
-  readonly tabSelect = output<string>();
+  /** Names the `<nav>` landmark — required, a landmark without a name is a11y noise. */
+  readonly ariaLabel = input.required<string>();
 }

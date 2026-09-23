@@ -21,13 +21,11 @@
     <div class="border border-dashed border-rule px-6 py-14 text-center" role="alert">
       <p class="font-medium text-ink">We couldn't find that task.</p>
       <p class="mt-1 text-sm text-ink-soft">It may have been deleted.</p>
-      <button
-        type="button"
-        class="mt-4 cursor-pointer border border-ink bg-ink px-4 py-2 text-sm font-medium text-paper transition-colors hover:bg-paper hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-        (click)="onCancel()"
-      >
-        Back to tasks
-      </button>
+      <app-common-button
+        class="mt-4"
+        label="Back to tasks"
+        (buttonClick)="onCancel()"
+      />
     </div>
   } @else {
     <form [formGroup]="form" (ngSubmit)="onSubmit()" appFocusFirstInvalid novalidate>
@@ -73,22 +71,18 @@
         </div>
       }
 
-      <div class="flex flex-wrap items-center gap-3 border-t border-rule pt-6">
-        <button
-          type="submit"
-          class="cursor-pointer border border-ink bg-ink px-4 py-2 text-sm font-medium text-paper transition-colors hover:bg-paper hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:cursor-not-allowed disabled:opacity-60"
-          [disabled]="isSaving()"
-        >
-          {{ isSaving() ? 'Saving…' : submitLabel() }}
-        </button>
+      <div class="flex flex-wrap items-center justify-end gap-3 border-t border-rule pt-6">
+        <app-common-button
+          variant="subtle"
+          label="Cancel"
+          (buttonClick)="onCancel()"
+        />
 
-        <button
-          type="button"
-          class="cursor-pointer border border-rule px-4 py-2 text-sm font-medium text-ink transition-colors hover:border-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-          (click)="onCancel()"
-        >
-          Cancel
-        </button>
+        <app-common-button
+          type="submit"
+          [label]="submitButtonLabel()"
+          [disabled]="isSaving()"
+        />
       </div>
     </form>
   }
